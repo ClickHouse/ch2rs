@@ -155,12 +155,12 @@ fn parse_type(raw: &str, options: &Options) -> Result<SqlType> {
             else if let Some(inner) = extract_inner(raw, "Enum16") {
                 SqlType::Enum16(parse_kv_list(inner).context("invalid enum")?)
             }
-            // Decimal(w, p)
+            // Decimal(prec, scale)
             else if let Some(inner) = extract_inner(raw, "Decimal") {
-                let (width, prec) = inner.split_once(", ").context("invalid decimal")?;
-                let width = width.parse().context("invalid width")?;
-                let prec = prec.parse().context("invalid precision")?;
-                SqlType::Decimal(width, prec)
+                let (prec, scale) = inner.split_once(", ").context("invalid decimal")?;
+                let prec = prec.parse().context("invalid prec")?;
+                let scale = scale.parse().context("invalid precision")?;
+                SqlType::Decimal(prec, scale)
             }
             // FixedString(size)
             else if let Some(inner) = extract_inner(raw, "FixedString") {

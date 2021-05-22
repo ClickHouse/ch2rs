@@ -1,6 +1,3 @@
-use clickhouse::Reflection;
-use serde::Deserialize;
-
 #[derive(Debug)]
 pub struct Schema {
     pub tables: Vec<Table>,
