@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use heck::CamelCase;
+use heck::{CamelCase, SnakeCase};
 
 use crate::{
     options::Options,
@@ -30,8 +30,9 @@ fn generate_row(table: &Table, options: &Options, owned: bool) -> Result<()> {
 }
 
 fn generate_field(column: &Column, options: &Options, owned: bool) -> Result<()> {
+    let name = column.name.to_snake_case();
     let type_ = make_type(&column.type_, &column.name, options, owned);
-    println!("    pub {}: {},", column.name, type_);
+    println!("    pub {}: {},", name, type_);
     Ok(())
 }
 
