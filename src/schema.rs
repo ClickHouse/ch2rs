@@ -18,7 +18,6 @@ pub struct Column {
     pub name: String,
     pub type_: SqlType,
     pub comment: String,
-    pub low_cardinality: bool,
 }
 
 #[derive(Debug)]
@@ -32,7 +31,7 @@ pub enum SqlType {
     Int32,
     Int64,
     String,
-    FixedString(usize),
+    FixedString(u32),
     Float32,
     Float64,
     Date,
@@ -41,9 +40,11 @@ pub enum SqlType {
     Ipv4,
     Ipv6,
     Uuid,
+    Decimal(u32, u32),
+    Enum8(Vec<(String, i32)>),
+    Enum16(Vec<(String, i32)>),
     Array(Box<SqlType>),
-    Decimal(u8, u8),
-    Enum8(Vec<(String, i8)>),
-    Enum16(Vec<(String, i16)>),
+    Tuple(Vec<SqlType>),
+    Map(Box<SqlType>, Box<SqlType>),
     Nullable(Box<SqlType>),
 }
