@@ -11,8 +11,12 @@ async fn main() -> Result<()> {
         url: "http://localhost:8123".into(),
         user: None,
         password: None,
+        include: vec!["%".into()],
+        exclude: vec![],
     };
 
-    miner::mine(&options).await?;
+    let schema = miner::mine(&options).await?;
+    println!("{:#?}", schema);
+
     Ok(())
 }

@@ -31,11 +31,45 @@ struct RawColumn {
     comment: String,
 }
 
-async fn fetch_raw_columns(client: &Client) -> Result<Vec<RawColumn>> {
+async fn fetch_raw_columns(client: &Client, options: &Options) -> Result<Vec<RawColumn>> {
+    // (id LIKE i[0] OR id LIKE i[1] OR ...) AND NOT
+    // (id LIKE e[0] OR id LIKE e[1] OR ...)
+    let include = join_disjunction(&options.include);
+    let exclude = join_disjunction(&options.exclude);
+
     Ok(client
-        .query("SELECT ?fields FROM system.columns ORDER BY database, table")
+        .query(&format!(
+            "SELECT ?fields FROM (
+                SELECT ?fields, concat(database, '.', table) AS id
+                  FROM system.columns
+                 WHERE ({}) AND NOT ({})
+                 ORDER BY id
+            )",
+            include, exclude
+        ))
         .fetch_all::<RawColumn>()
         .await?)
+}
+
+fn join_disjunction(list: &[String]) -> String {
+    if list.is_empty() {
+        return "0".into();
+    }
+
+    list.iter()
+        .enumerate()
+        .fold(String::new(), |mut s, (i, item)| {
+            if i > 0 {
+                s.push_str(" OR ");
+            }
+            s.push_str("id LIKE ");
+
+            // TODO: improve escaping.
+            s.push('\'');
+            s.push_str(&item);
+            s.push('\'');
+            s
+        })
 }
 
 fn make_schema(raw_columns: Vec<RawColumn>, options: &Options) -> Result<Schema> {
@@ -181,7 +215,7 @@ fn parse_kv_list(raw: &str) -> Result<Vec<(String, i32)>> {
 
 pub async fn mine(options: &Options) -> Result<Schema> {
     let client = make_client(options);
-    let raw_columns = fetch_raw_columns(&client)
+    let raw_columns = fetch_raw_columns(&client, options)
         .await
         .context("failed to fetch columns")?;
     let schema = make_schema(raw_columns, options).context("failed to make the schema")?;
