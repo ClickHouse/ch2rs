@@ -202,11 +202,12 @@ fn extract_inner<'a>(raw: &'a str, wrapper: &str) -> Option<&'a str> {
 
 // 'K' = v, 'K2' = v2
 fn parse_kv_list(raw: &str) -> Result<Vec<(String, i32)>> {
-    raw.split(',')
+    raw.split(", ")
         .map(|pair| {
             let (k, v) = pair
                 .split_once(" = ")
                 .with_context(|| format!("invalid key-value pair `{}`", pair))?;
+            let k = k.get(1..k.len() - 1).context("invalid variant key")?;
             let v = v.parse().context("invalid variant value")?;
             Ok((k.into(), v))
         })
