@@ -1,3 +1,5 @@
+use std::io::Write;
+
 use anyhow::{bail, Context, Result};
 use heck::{CamelCase, SnakeCase};
 
@@ -6,40 +8,45 @@ use crate::{
     schema::{Column, SqlType, Table},
 };
 
-fn generate_prelude(options: &Options) -> Result<()> {
-    println!("// GENERATED CODE");
-    println!("/* generated with the following options:");
-    println!("\n{}\n", options.format());
-    println!("*/\n");
-
-    // TODO: print options.
-
+fn generate_prelude(dst: &mut impl Write, options: &Options) -> Result<()> {
+    writeln!(dst, "// GENERATED CODE")?;
+    writeln!(dst, "/* generated with the following options:")?;
+    writeln!(dst, "\n{}\n", options.format())?;
+    writeln!(dst, "*/\n")?;
+    writeln!(dst, "#![allow(warnings)]")?;
+    writeln!(dst, "#![allow(clippy::all)]")?;
+    writeln!(dst)?;
+    writeln!(dst, "use clickhouse::Reflection;")?;
+    writeln!(dst, "use serde::{{Serialize, Deserialize}};")?;
     Ok(())
 }
 
-fn generate_row(table: &Table, options: &Options) -> Result<()> {
-    println!("#[derive(Debug, serde::Serialize, clickhouse::Reflection)]");
+fn generate_row(dst: &mut impl Write, table: &Table, options: &Options) -> Result<()> {
+    writeln!(dst, "#[derive(Debug, Serialize, Deserialize, Reflection)]")?;
 
-    if options.owned {
-        println!("pub struct OwnedRow {{");
-    } else {
-        println!("pub struct BorrowedRow<'a> {{");
-    }
+    let mut buffer = Vec::new();
 
     for column in &table.columns {
-        generate_field(column, options)
+        generate_field(&mut buffer, column, options)
             .with_context(|| format!("failed to generate the `{}` field", column.name))?;
     }
 
-    println!("}}");
+    let has_lifetime = buffer.windows(2).any(|w| w == b"'a");
+    if has_lifetime {
+        writeln!(dst, "pub struct Row<'a> {{")?;
+    } else {
+        writeln!(dst, "pub struct Row {{")?;
+    }
 
+    dst.write_all(&buffer)?;
+    writeln!(dst, "}}")?;
     Ok(())
 }
 
-fn generate_field(column: &Column, options: &Options) -> Result<()> {
+fn generate_field(dst: &mut impl Write, column: &Column, options: &Options) -> Result<()> {
     let name = column.name.to_snake_case();
     let type_ = make_type(&column.type_, &column.name, options)?;
-    println!("    pub {}: {},", name, type_);
+    writeln!(dst, "    pub {}: {},", name, type_)?;
     Ok(())
 }
 
@@ -90,8 +97,9 @@ fn make_type(raw: &SqlType, name: &str, options: &Options) -> Result<String> {
 }
 
 pub fn generate(table: &Table, options: &Options) -> Result<()> {
-    generate_prelude(options).context("failed to generate a prelude")?;
-    generate_row(table, options).context("failed to generate a row")?;
-
+    let mut stdout = std::io::stdout();
+    generate_prelude(&mut stdout, options).context("failed to generate a prelude")?;
+    writeln!(stdout)?;
+    generate_row(&mut stdout, table, options).context("failed to generate a row")?;
     Ok(())
 }
