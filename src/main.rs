@@ -11,14 +11,16 @@ async fn main() -> Result<()> {
         url: "http://localhost:8123".into(),
         user: None,
         password: None,
-        // TODO: remove support for many tables.
-        include: vec!["%.balance_log".into()],
-        exclude: vec![],
+        database: "default".into(),
+        table: "balance_log".into(),
+        owned: false,
+        types: vec![],
+        overrides: vec![],
     };
 
-    let mut schema = miner::mine(&options).await?;
+    let table = miner::mine(&options).await?;
 
-    codegen::generate(&schema.tables[0], &options)?;
+    codegen::generate(&table, &options)?;
 
     Ok(())
 }

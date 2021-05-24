@@ -1,9 +1,4 @@
 #[derive(Debug)]
-pub struct Schema {
-    pub tables: Vec<Table>,
-}
-
-#[derive(Debug)]
 pub struct Table {
     pub database: String,
     pub name: String,

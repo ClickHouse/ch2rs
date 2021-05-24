@@ -14,29 +14,29 @@ fn generate_prelude(options: &Options) -> Result<()> {
     Ok(())
 }
 
-fn generate_row(table: &Table, options: &Options, owned: bool) -> Result<()> {
-    if owned {
+fn generate_row(table: &Table, options: &Options) -> Result<()> {
+    if options.owned {
         println!("pub struct OwnedRow {{");
     } else {
         println!("pub struct BorrowedRow<'a> {{");
     }
 
     for column in &table.columns {
-        generate_field(column, options, owned)
+        generate_field(column, options)
             .with_context(|| format!("failed to generate the `{}` field", column.name))?;
     }
 
     Ok(())
 }
 
-fn generate_field(column: &Column, options: &Options, owned: bool) -> Result<()> {
+fn generate_field(column: &Column, options: &Options) -> Result<()> {
     let name = column.name.to_snake_case();
-    let type_ = make_type(&column.type_, &column.name, options, owned);
+    let type_ = make_type(&column.type_, &column.name, options);
     println!("    pub {}: {},", name, type_);
     Ok(())
 }
 
-fn make_type(raw: &SqlType, name: &str, options: &Options, owned: bool) -> String {
+fn make_type(raw: &SqlType, name: &str, options: &Options) -> String {
     // TODO: custom types.
     match raw {
         SqlType::UInt8 => "u8".into(),
@@ -47,7 +47,7 @@ fn make_type(raw: &SqlType, name: &str, options: &Options, owned: bool) -> Strin
         SqlType::Int16 => "i16".into(),
         SqlType::Int32 => "i32".into(),
         SqlType::Int64 => "i64".into(),
-        SqlType::String if owned => "String".into(),
+        SqlType::String if options.owned => "String".into(),
         SqlType::String => "&'a str".into(),
         SqlType::FixedString(_size) => todo!(),
         SqlType::Float32 => "f32".into(),
@@ -60,31 +60,19 @@ fn make_type(raw: &SqlType, name: &str, options: &Options, owned: bool) -> Strin
         SqlType::Uuid => todo!(),
         SqlType::Decimal(_prec, _scale) => todo!(),
         SqlType::Enum8(_) | SqlType::Enum16(_) => name.to_camel_case(),
-        SqlType::Array(inner) => format!("Vec<{}>", make_type(inner, name, options, owned)),
-        SqlType::Tuple(_inner) => "kek".into(),
+        SqlType::Array(inner) => format!("Vec<{}>", make_type(inner, name, options)),
+        SqlType::Tuple(inner) => inner
+            .iter()
+            .map(|i| format!("{}, ", make_type(i, name, options)))
+            .collect(),
         SqlType::Map(_key, _value) => todo!(),
-        SqlType::Nullable(inner) => format!("Option<{}>", make_type(inner, name, options, owned)),
+        SqlType::Nullable(inner) => format!("Option<{}>", make_type(inner, name, options)),
     }
 }
 
 pub fn generate(table: &Table, options: &Options) -> Result<()> {
     generate_prelude(options).context("failed to generate a prelude")?;
-
-    // TODO !!!: Focus on one table only.
-
-    generate_row(table, options, true).with_context(|| {
-        format!(
-            "failed to generate a owned row for the `{}` table",
-            table.name
-        )
-    })?;
-
-    generate_row(table, options, false).with_context(|| {
-        format!(
-            "failed to generate a borrowed row for the `{}` table",
-            table.name
-        )
-    })?;
+    generate_row(table, options).context("failed to generate a row")?;
 
     Ok(())
 }

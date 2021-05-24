@@ -8,7 +8,7 @@ edition = "2018"
 
 [dependencies]
 anyhow = "1.0.40"
-clickhouse = "*"
+clickhouse = "0.6.5"
 heck = "0.3.2"
 reflection = "0.1.3"
 serde = { version = "1.0.126", features = ["derive"] }

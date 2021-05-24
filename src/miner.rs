@@ -4,7 +4,7 @@ use serde::Deserialize;
 
 use crate::{
     options::Options,
-    schema::{Column, Schema, SqlType, Table},
+    schema::{Column, SqlType, Table},
 };
 
 fn make_client(options: &Options) -> Client {
@@ -23,8 +23,6 @@ fn make_client(options: &Options) -> Client {
 
 #[derive(Debug, Deserialize, Reflection)]
 struct RawColumn {
-    database: String,
-    table: String,
     name: String,
     #[serde(rename = "type")]
     type_: String,
@@ -32,68 +30,35 @@ struct RawColumn {
 }
 
 async fn fetch_raw_columns(client: &Client, options: &Options) -> Result<Vec<RawColumn>> {
-    // (id LIKE i[0] OR id LIKE i[1] OR ...) AND NOT
-    // (id LIKE e[0] OR id LIKE e[1] OR ...)
-    let include = join_disjunction(&options.include);
-    let exclude = join_disjunction(&options.exclude);
-
     Ok(client
-        .query(&format!(
-            "SELECT ?fields FROM (
-                SELECT ?fields, concat(database, '.', table) AS id
-                  FROM system.columns
-                 WHERE ({}) AND NOT ({})
-                 ORDER BY id
-            )",
-            include, exclude
-        ))
+        .query(
+            "
+            SELECT ?fields
+              FROM system.columns
+             WHERE database = ?
+               AND table = ?
+        ",
+        )
+        .bind(&options.database)
+        .bind(&options.table)
         .fetch_all::<RawColumn>()
         .await?)
 }
 
-fn join_disjunction(list: &[String]) -> String {
-    if list.is_empty() {
-        return "0".into();
-    }
-
-    list.iter()
-        .enumerate()
-        .fold(String::new(), |mut s, (i, item)| {
-            if i > 0 {
-                s.push_str(" OR ");
-            }
-            s.push_str("id LIKE ");
-
-            // TODO: improve escaping.
-            s.push('\'');
-            s.push_str(&item);
-            s.push('\'');
-            s
-        })
-}
-
-fn make_schema(raw_columns: Vec<RawColumn>, options: &Options) -> Result<Schema> {
-    let mut tables: Vec<Table> = Vec::new();
+fn make_table(raw_columns: Vec<RawColumn>, options: &Options) -> Result<Table> {
+    let mut columns = Vec::new();
 
     for raw_column in raw_columns {
-        if tables.last().map_or(true, |t| t.name != raw_column.table) {
-            tables.push(Table {
-                database: raw_column.database.clone(),
-                name: raw_column.table.clone(),
-                columns: Vec::new(),
-            });
-        }
-
-        let table = tables.last_mut().unwrap();
-        let reason = format!(
-            "failed to handle the `{}` column in `{}.{}`",
-            raw_column.name, raw_column.database, raw_column.table
-        );
+        let reason = format!("failed to handle the `{}` column", raw_column.name);
         let column = make_column(raw_column, options).context(reason)?;
-        table.columns.push(column);
+        columns.push(column);
     }
 
-    Ok(Schema { tables })
+    Ok(Table {
+        database: options.database.clone(),
+        name: options.table.clone(),
+        columns,
+    })
 }
 
 fn make_column(raw: RawColumn, options: &Options) -> Result<Column> {
@@ -214,11 +179,11 @@ fn parse_kv_list(raw: &str) -> Result<Vec<(String, i32)>> {
         .collect()
 }
 
-pub async fn mine(options: &Options) -> Result<Schema> {
+pub async fn mine(options: &Options) -> Result<Table> {
     let client = make_client(options);
     let raw_columns = fetch_raw_columns(&client, options)
         .await
         .context("failed to fetch columns")?;
-    let schema = make_schema(raw_columns, options).context("failed to make the schema")?;
-    Ok(schema)
+    let table = make_table(raw_columns, options).context("failed to make the table")?;
+    Ok(table)
 }
