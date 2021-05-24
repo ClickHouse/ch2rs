@@ -1,4 +1,5 @@
 use anyhow::Result;
+use structopt::StructOpt;
 
 mod codegen;
 mod miner;
@@ -7,17 +8,7 @@ mod schema;
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<()> {
-    let options = options::Options {
-        url: "http://localhost:8123".into(),
-        user: None,
-        password: None,
-        database: "default".into(),
-        table: "balance_log".into(),
-        owned: false,
-        types: vec![],
-        overrides: vec![],
-    };
-
+    let options = options::Options::from_args();
     let table = miner::mine(&options).await?;
 
     codegen::generate(&table, &options)?;

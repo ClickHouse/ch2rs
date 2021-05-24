@@ -1,3 +1,5 @@
+use std::fmt;
+
 #[derive(Debug)]
 pub struct Table {
     pub database: String,
@@ -12,7 +14,7 @@ pub struct Column {
     pub comment: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum SqlType {
     UInt8,
     UInt16,
@@ -39,4 +41,17 @@ pub enum SqlType {
     Tuple(Vec<SqlType>),
     Map(Box<SqlType>, Box<SqlType>),
     Nullable(Box<SqlType>),
+}
+
+impl fmt::Display for SqlType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            SqlType::DateTime(Some(tz)) => write!(f, "DateTime({})", tz),
+            SqlType::DateTime(None) => f.write_str("DateTime"),
+            SqlType::DateTime64(prec, Some(tz)) => write!(f, "DateTime({}, {})", prec, tz),
+            SqlType::DateTime64(prec, None) => write!(f, "DateTime({})", prec),
+            SqlType::Uuid => f.write_str("UUID"),
+            _ => fmt::Debug::fmt(self, f),
+        }
+    }
 }

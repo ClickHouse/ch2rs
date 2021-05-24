@@ -8,7 +8,13 @@ use crate::{
 };
 
 fn make_client(options: &Options) -> Client {
-    let mut client = Client::default().with_url(&options.url);
+    let url = if !options.url.starts_with("http") {
+        format!("http://{}", options.url)
+    } else {
+        options.url.clone()
+    };
+
+    let mut client = Client::default().with_url(&url);
 
     if let Some(user) = &options.user {
         client = client.with_user(user);
@@ -50,7 +56,7 @@ fn make_table(raw_columns: Vec<RawColumn>, options: &Options) -> Result<Table> {
 
     for raw_column in raw_columns {
         let reason = format!("failed to handle the `{}` column", raw_column.name);
-        let column = make_column(raw_column, options).context(reason)?;
+        let column = make_column(raw_column).context(reason)?;
         columns.push(column);
     }
 
@@ -61,8 +67,8 @@ fn make_table(raw_columns: Vec<RawColumn>, options: &Options) -> Result<Table> {
     })
 }
 
-fn make_column(raw: RawColumn, options: &Options) -> Result<Column> {
-    let type_ = parse_type(&raw.type_, options)
+fn make_column(raw: RawColumn) -> Result<Column> {
+    let type_ = parse_type(&raw.type_)
         .with_context(|| format!("failed to parse the `{}` type", raw.type_))?;
 
     Ok(Column {
@@ -72,7 +78,7 @@ fn make_column(raw: RawColumn, options: &Options) -> Result<Column> {
     })
 }
 
-fn parse_type(raw: &str, options: &Options) -> Result<SqlType> {
+pub fn parse_type(raw: &str) -> Result<SqlType> {
     let raw = extract_inner(raw, "LowCardinality").unwrap_or(raw);
 
     // TODO: unwrap `SimpleAggregateFunction`.
@@ -97,7 +103,7 @@ fn parse_type(raw: &str, options: &Options) -> Result<SqlType> {
         _ => {
             // Nullable(type)
             if let Some(inner) = extract_inner(raw, "Nullable") {
-                SqlType::Nullable(Box::new(parse_type(inner, options)?))
+                SqlType::Nullable(Box::new(parse_type(inner)?))
             }
             // DateTime(tz)
             else if let Some(inner) = extract_inner(raw, "DateTime") {
@@ -133,22 +139,22 @@ fn parse_type(raw: &str, options: &Options) -> Result<SqlType> {
             }
             // Array(type)
             else if let Some(inner) = extract_inner(raw, "Array") {
-                SqlType::Array(Box::new(parse_type(inner, options)?))
+                SqlType::Array(Box::new(parse_type(inner)?))
             }
             // Tuple(a, b)
             else if let Some(inner) = extract_inner(raw, "Tuple") {
                 SqlType::Tuple(
                     inner
                         .split(", ")
-                        .map(|t| parse_type(t, options))
+                        .map(|t| parse_type(t))
                         .collect::<Result<Vec<_>>>()?,
                 )
             }
             // Map(key, value)
             else if let Some(inner) = extract_inner(raw, "Map") {
                 let (key, value) = inner.split_once(", ").context("invalid map")?;
-                let key = parse_type(key, options).context("invalid key")?;
-                let value = parse_type(value, options).context("invalid value")?;
+                let key = parse_type(key).context("invalid key")?;
+                let value = parse_type(value).context("invalid value")?;
                 SqlType::Map(Box::new(key), Box::new(value))
             } else {
                 bail!("unknown type");
