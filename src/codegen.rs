@@ -1,4 +1,4 @@
-use std::io::Write;
+use std::fmt::Write;
 
 use anyhow::{bail, Context, Result};
 use heck::{CamelCase, SnakeCase};
@@ -34,21 +34,21 @@ fn generate_row(dst: &mut impl Write, table: &Table, options: &Options) -> Resul
         writeln!(dst, "#[derive(serde::Deserialize)]")?;
     }
 
-    let mut buffer = Vec::new();
+    let mut buffer = String::new();
 
     for column in &table.columns {
         generate_field(&mut buffer, column, options)
             .with_context(|| format!("failed to generate the `{}` field", column.name))?;
     }
 
-    let has_lifetime = buffer.windows(2).any(|w| w == b"'a");
+    let has_lifetime = buffer.contains("'a");
     if has_lifetime {
         writeln!(dst, "pub struct Row<'a> {{")?;
     } else {
         writeln!(dst, "pub struct Row {{")?;
     }
 
-    dst.write_all(&buffer)?;
+    dst.write_str(&buffer)?;
     writeln!(dst, "}}")?;
     Ok(())
 }
@@ -167,12 +167,12 @@ fn generate_enum(
     Ok(())
 }
 
-pub fn generate(table: &Table, options: &Options) -> Result<()> {
-    let mut stdout = std::io::stdout();
-    generate_prelude(&mut stdout, options).context("failed to generate a prelude")?;
-    writeln!(stdout)?;
-    generate_row(&mut stdout, table, options).context("failed to generate a row")?;
-    writeln!(stdout)?;
-    generate_enums(&mut stdout, table, options).context("failed to generate enums")?;
-    Ok(())
+pub fn generate(table: &Table, options: &Options) -> Result<String> {
+    let mut code = String::new();
+    generate_prelude(&mut code, options).context("failed to generate a prelude")?;
+    writeln!(code)?;
+    generate_row(&mut code, table, options).context("failed to generate a row")?;
+    writeln!(code)?;
+    generate_enums(&mut code, table, options).context("failed to generate enums")?;
+    Ok(code)
 }
