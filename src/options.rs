@@ -18,6 +18,10 @@ pub struct Options {
     pub database: String,
     pub table: String,
 
+    #[structopt(short = "S")]
+    pub serialize: bool,
+    #[structopt(short = "D")]
+    pub deserialize: bool,
     #[structopt(long)]
     pub owned: bool,
     #[structopt(short = "T", parse(try_from_str = parse_type), number_of_values = 1)]
@@ -64,11 +68,19 @@ impl Options {
             let _ = write!(&mut s, " -d {}", self.database);
         }
 
-        s.push_str(" \\\n");
+        if self.serialize {
+            s.push_str(" -S");
+        }
+
+        if self.deserialize {
+            s.push_str(" -D");
+        }
 
         if self.owned {
-            let _ = writeln!(&mut s, "    --owned");
+            s.push_str(" --owned");
         }
+
+        s.push_str(" \\\n");
 
         for t in &self.types {
             let _ = writeln!(&mut s, "    -T '{}={}' \\", t.sql, t.type_);

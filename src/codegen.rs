@@ -9,20 +9,30 @@ use crate::{
 };
 
 fn generate_prelude(dst: &mut impl Write, options: &Options) -> Result<()> {
-    writeln!(dst, "// GENERATED CODE")?;
-    writeln!(dst, "/* generated with the following options:")?;
-    writeln!(dst, "\n{}\n", options.format())?;
-    writeln!(dst, "*/\n")?;
+    writeln!(dst, "// GENERATED CODE\n//")?;
+    writeln!(dst, "// generated with the following options:")?;
+    writeln!(
+        dst,
+        "//     {}\n",
+        options.format().replace("\n", "\n//     ")
+    )?;
     writeln!(dst, "#![allow(warnings)]")?;
     writeln!(dst, "#![allow(clippy::all)]")?;
-    writeln!(dst)?;
-    writeln!(dst, "use clickhouse::Reflection;")?;
-    writeln!(dst, "use serde::{{Serialize, Deserialize}};")?;
+    writeln!(dst, "\nuse clickhouse::Reflection;")?;
+
     Ok(())
 }
 
 fn generate_row(dst: &mut impl Write, table: &Table, options: &Options) -> Result<()> {
-    writeln!(dst, "#[derive(Debug, Serialize, Deserialize, Reflection)]")?;
+    writeln!(dst, "#[derive(Debug, Reflection)]")?;
+
+    if options.serialize {
+        writeln!(dst, "#[derive(serde::Serialize)]")?;
+    }
+
+    if options.deserialize {
+        writeln!(dst, "#[derive(serde::Deserialize)]")?;
+    }
 
     let mut buffer = Vec::new();
 
@@ -59,7 +69,6 @@ fn make_type(raw: &SqlType, name: &str, options: &Options) -> Result<String> {
         return Ok(t.type_.clone());
     }
 
-    // TODO: custom types.
     Ok(match raw {
         SqlType::UInt8 => "u8".into(),
         SqlType::UInt16 => "u16".into(),
@@ -90,10 +99,72 @@ fn make_type(raw: &SqlType, name: &str, options: &Options) -> Result<String> {
         //SqlType::Map(_key, _value) => todo!(),
         SqlType::Nullable(inner) => format!("Option<{}>", make_type(inner, name, options)?),
         _ => bail!(
-            "there is no default impl for {:?}, use -T or -O to specify it",
+            "there is no default impl for {}, use -T or -O to specify it",
             raw
         ),
     })
+}
+
+fn generate_enums(dst: &mut impl Write, table: &Table, options: &Options) -> Result<()> {
+    fn find_enum(t: &SqlType) -> Option<(bool, &[(String, i32)])> {
+        match t {
+            SqlType::Enum8(v) => Some((false, &v)),
+            SqlType::Enum16(v) => Some((true, &v)),
+            SqlType::Array(inner) => find_enum(inner),
+            SqlType::Tuple(inner) => inner.iter().flat_map(|i| find_enum(i)).next(),
+            SqlType::Nullable(inner) => find_enum(inner),
+            _ => None,
+        }
+    }
+
+    for column in &table.columns {
+        if let Some((is_extended, variants)) = find_enum(&column.type_) {
+            generate_enum(
+                dst,
+                &column.name.to_camel_case(),
+                is_extended,
+                variants,
+                options,
+            )?;
+            writeln!(dst)?;
+        }
+    }
+
+    Ok(())
+}
+
+fn generate_enum(
+    dst: &mut impl Write,
+    name: &str,
+    is_extended: bool,
+    variants: &[(String, i32)],
+    options: &Options,
+) -> Result<()> {
+    writeln!(dst, "#[derive(Debug, Reflection)]")?;
+
+    if options.serialize {
+        writeln!(dst, "#[derive(serde_repr::Serialize_repr)]")?;
+    }
+
+    if options.deserialize {
+        writeln!(dst, "#[derive(serde_repr::Deserialize_repr)]")?;
+    }
+
+    if is_extended {
+        writeln!(dst, "#[repr(i16)]")?;
+    } else {
+        writeln!(dst, "#[repr(i8)]")?;
+    }
+
+    writeln!(dst, "pub enum {} {{", name)?;
+
+    for (name, value) in variants {
+        writeln!(dst, "    {} = {},", name.to_camel_case(), value)?;
+    }
+
+    writeln!(dst, "}}")?;
+
+    Ok(())
 }
 
 pub fn generate(table: &Table, options: &Options) -> Result<()> {
@@ -101,5 +172,7 @@ pub fn generate(table: &Table, options: &Options) -> Result<()> {
     generate_prelude(&mut stdout, options).context("failed to generate a prelude")?;
     writeln!(stdout)?;
     generate_row(&mut stdout, table, options).context("failed to generate a row")?;
+    writeln!(stdout)?;
+    generate_enums(&mut stdout, table, options).context("failed to generate enums")?;
     Ok(())
 }
