@@ -7,6 +7,7 @@ use crate::schema::SqlType;
 
 #[derive(Debug, StructOpt)]
 pub struct Options {
+    /// ClickHouse server's URL.
     #[structopt(short = "U", default_value = "localhost:8123")]
     pub url: String,
     #[structopt(short = "u")]
@@ -14,20 +15,28 @@ pub struct Options {
     #[structopt(short = "p")]
     pub password: Option<String>,
 
+    /// A database where the table is placed in.
     #[structopt(short = "d", default_value = "default")]
     pub database: String,
+    /// The table's name.
     pub table: String,
 
+    /// Generate `Serialize` instances.
     #[structopt(short = "S")]
     pub serialize: bool,
+    /// Generate `Deserialize` instances.
     #[structopt(short = "D")]
     pub deserialize: bool,
+    /// Generate only owned types.
     #[structopt(long)]
     pub owned: bool,
+    /// Override the type, e.g. 'Decimal(18, 9)=fixnum::FixedPoint<i64, typenum::U9>'
     #[structopt(short = "T", parse(try_from_str = parse_type), number_of_values = 1)]
     pub types: Vec<Type>,
+    /// Override the type of the provided column.
     #[structopt(short = "O", parse(try_from_str = parse_override), number_of_values = 1)]
     pub overrides: Vec<Override>,
+    /// Add `#[serde(with = "serde_bytes")]` to the provided column.
     #[structopt(short = "B")]
     pub bytes: Vec<String>,
 }
