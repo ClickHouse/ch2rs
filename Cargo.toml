@@ -1,7 +1,12 @@
 [package]
 name = "ch2rs"
 version = "0.1.0"
+description = "Generate Rust structs from ClickHouse rows"
+keywords = ["clickhouse", "database", "generator"]
 authors = ["Paul Loyd <pavelko95@gmail.com>"]
+repository = "https://github.com/loyd/ch2rs"
+license = "MIT"
+readme = "README.md"
 edition = "2018"
 
 [[bin]]
