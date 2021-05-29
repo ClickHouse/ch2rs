@@ -1,0 +1,75 @@
+---
+source: tests/integration.rs
+expression: code
+
+---
+// GENERATED CODE
+//
+// generated with the following options:
+//     ch2rs ch2rs_test -S --owned \
+//         -T 'FixedString(5)=[u8; 5]' \
+//         -T 'Date=u16' \
+//         -T 'DateTime=u32' \
+//         -T 'DateTime(9)=u64' \
+//         -T 'Ipv4=u32' \
+//         -T 'Ipv6=[u8; 16]' \
+//         -T 'UUID=[u8; 16]' \
+//         -T 'Decimal(18, 9)=u64' \
+//         -O bytes=Vec\<u8\>
+
+#![allow(warnings)]
+#![allow(clippy::all)]
+
+use clickhouse::Reflection;
+
+#[derive(Debug, Reflection)]
+#[derive(serde::Serialize)]
+pub struct Row {
+    pub u8: u8,
+    pub u16: u16,
+    pub u32: u32,
+    pub u64: u64,
+    pub i8: i8,
+    pub i16: i16,
+    pub i32: i32,
+    pub i64: i64,
+    pub str: String,
+    pub low_str: String,
+    pub blob: String,
+    pub fs: [u8; 5],
+    pub f32: f32,
+    pub f64: f64,
+    pub d: u16,
+    pub dt: u32,
+    pub dt64: u64,
+    pub ipv4: u32,
+    pub ipv6: [u8; 16],
+    pub uuid: [u8; 16],
+    pub dec64: u64,
+    pub enum8: Enum8,
+    pub enum16: Enum16,
+    pub array: Vec<String>,
+    pub tuple: (String, String, ),
+    pub opt_str: Option<String>,
+    pub default: u16,
+    pub material: u16,
+    pub alias: u16,
+}
+
+#[derive(Debug, Reflection)]
+#[derive(serde_repr::Serialize_repr)]
+#[repr(i8)]
+pub enum Enum8 {
+    Empty = -128,
+    FooBar = 0,
+}
+
+#[derive(Debug, Reflection)]
+#[derive(serde_repr::Serialize_repr)]
+#[repr(i16)]
+pub enum Enum16 {
+    Empty = -128,
+    FooBar = 1024,
+}
+
+
