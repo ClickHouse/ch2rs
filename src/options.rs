@@ -87,7 +87,7 @@ impl Options {
         }
 
         for o in &self.overrides {
-            let _ = writeln!(&mut s, "    -O {}={} \\", o.column, o.type_);
+            let _ = writeln!(&mut s, "    -O '{}={}' \\", o.column, o.type_);
         }
 
         s.trim_end_matches(|c| c == '\\' || c == ' ' || c == '\n')
