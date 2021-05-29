@@ -20,4 +20,5 @@ tokio = { version = "1.6.0", features = ["macros"] }
 [dev-dependencies]
 insta = "1.7.1"
 serde_repr = "0.1.7"
+serde_bytes = "0.11.5"
 trybuild = "1.0.42"

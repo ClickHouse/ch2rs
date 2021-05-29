@@ -56,6 +56,11 @@ fn generate_row(dst: &mut impl Write, table: &Table, options: &Options) -> Resul
 fn generate_field(dst: &mut impl Write, column: &Column, options: &Options) -> Result<()> {
     let name = column.name.to_snake_case();
     let type_ = make_type(&column.type_, &column.name, options)?;
+
+    if options.bytes.iter().any(|b| b == &column.name) {
+        writeln!(dst, r#"    #[serde(with = "serde_bytes")]"#)?;
+    }
+
     writeln!(dst, "    pub {}: {},", name, type_)?;
     Ok(())
 }

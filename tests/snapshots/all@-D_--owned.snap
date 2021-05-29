@@ -15,7 +15,8 @@ expression: code
 //         -T 'Ipv6=[u8; 16]' \
 //         -T 'UUID=[u8; 16]' \
 //         -T 'Decimal(18, 9)=u64' \
-//         -O 'blob=Vec<u8>'
+//         -O 'blob=Vec<u8>' \
+//         -B 'blob'
 
 #![allow(warnings)]
 #![allow(clippy::all)]
@@ -35,6 +36,7 @@ pub struct Row {
     pub i64: i64,
     pub str: String,
     pub low_str: String,
+    #[serde(with = "serde_bytes")]
     pub blob: Vec<u8>,
     pub fs: [u8; 5],
     pub f32: f32,

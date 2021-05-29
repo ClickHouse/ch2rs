@@ -98,6 +98,8 @@ async fn generate_all() {
                 "Decimal(18, 9)=u64",
                 "-O",
                 "blob=Vec<u8>",
+                "-B",
+                "blob",
             ];
             let args = args.into_iter().filter(|s| !s.is_empty()).collect();
             let tmp = format!("{}_{}", t1, t2);

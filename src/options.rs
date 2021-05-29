@@ -28,6 +28,8 @@ pub struct Options {
     pub types: Vec<Type>,
     #[structopt(short = "O", parse(try_from_str = parse_override), number_of_values = 1)]
     pub overrides: Vec<Override>,
+    #[structopt(short = "B")]
+    pub bytes: Vec<String>,
 }
 
 #[derive(Debug)]
@@ -88,6 +90,10 @@ impl Options {
 
         for o in &self.overrides {
             let _ = writeln!(&mut s, "    -O '{}={}' \\", o.column, o.type_);
+        }
+
+        for b in &self.bytes {
+            let _ = writeln!(&mut s, "    -B '{}' \\", b);
         }
 
         s.trim_end_matches(|c| c == '\\' || c == ' ' || c == '\n')
