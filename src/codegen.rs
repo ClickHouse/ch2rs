@@ -92,10 +92,14 @@ fn make_type(raw: &SqlType, name: &str, options: &Options) -> Result<String> {
         //SqlType::Decimal(_prec, _scale) => todo!(),
         SqlType::Enum8(_) | SqlType::Enum16(_) => name.to_camel_case(),
         SqlType::Array(inner) => format!("Vec<{}>", make_type(inner, name, options)?),
-        SqlType::Tuple(inner) => inner
-            .iter()
-            .map(|i| make_type(i, name, options).map(|t| format!("{}, ", t)))
-            .collect::<Result<_>>()?,
+        SqlType::Tuple(inner) => {
+            let inner = inner
+                .iter()
+                .map(|i| make_type(i, name, options).map(|t| format!("{}, ", t)))
+                .collect::<Result<String>>()?;
+
+            format!("({})", inner)
+        }
         //SqlType::Map(_key, _value) => todo!(),
         SqlType::Nullable(inner) => format!("Option<{}>", make_type(inner, name, options)?),
         _ => bail!(
