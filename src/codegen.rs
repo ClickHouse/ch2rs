@@ -163,12 +163,20 @@ fn generate_enum(
     writeln!(dst, "pub enum {} {{", name)?;
 
     for (name, value) in variants {
-        writeln!(dst, "    {} = {},", name.to_camel_case(), value)?;
+        writeln!(dst, "    {} = {},", prepare_name_ident(name), value)?;
     }
 
     writeln!(dst, "}}")?;
 
     Ok(())
+}
+
+fn prepare_name_ident(name: &str) -> String {
+    if name.trim().is_empty() {
+        "Empty".into()
+    } else {
+        name.to_camel_case()
+    }
 }
 
 pub fn generate(table: &Table, options: &Options) -> Result<String> {
