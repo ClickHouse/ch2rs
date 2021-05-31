@@ -1,5 +1,5 @@
 use anyhow::{bail, Context, Result};
-use clickhouse::{Client, Reflection};
+use clickhouse::{Client, Row};
 use serde::Deserialize;
 
 use crate::{
@@ -27,7 +27,7 @@ fn make_client(options: &Options) -> Client {
     client
 }
 
-#[derive(Debug, Deserialize, Reflection)]
+#[derive(Debug, Deserialize, Row)]
 struct RawColumn {
     name: String,
     #[serde(rename = "type")]

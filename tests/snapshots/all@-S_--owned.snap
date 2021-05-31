@@ -21,9 +21,7 @@ expression: code
 #![allow(warnings)]
 #![allow(clippy::all)]
 
-use clickhouse::Reflection;
-
-#[derive(Debug, Reflection)]
+#[derive(Debug, clickhouse::Row)]
 #[derive(serde::Serialize)]
 pub struct Row {
     pub u8: u8,
@@ -58,7 +56,7 @@ pub struct Row {
     pub alias: u16,
 }
 
-#[derive(Debug, Reflection)]
+#[derive(Debug)]
 #[derive(serde_repr::Serialize_repr)]
 #[repr(i8)]
 pub enum Enum8 {
@@ -66,7 +64,7 @@ pub enum Enum8 {
     FooBar = 0,
 }
 
-#[derive(Debug, Reflection)]
+#[derive(Debug)]
 #[derive(serde_repr::Serialize_repr)]
 #[repr(i16)]
 pub enum Enum16 {

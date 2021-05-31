@@ -18,13 +18,12 @@ fn generate_prelude(dst: &mut impl Write, options: &Options) -> Result<()> {
     )?;
     writeln!(dst, "#![allow(warnings)]")?;
     writeln!(dst, "#![allow(clippy::all)]")?;
-    writeln!(dst, "\nuse clickhouse::Reflection;")?;
 
     Ok(())
 }
 
 fn generate_row(dst: &mut impl Write, table: &Table, options: &Options) -> Result<()> {
-    writeln!(dst, "#[derive(Debug, Reflection)]")?;
+    writeln!(dst, "#[derive(Debug, clickhouse::Row)]")?;
 
     if options.serialize {
         writeln!(dst, "#[derive(serde::Serialize)]")?;
@@ -149,7 +148,7 @@ fn generate_enum(
     variants: &[(String, i32)],
     options: &Options,
 ) -> Result<()> {
-    writeln!(dst, "#[derive(Debug, Reflection)]")?;
+    writeln!(dst, "#[derive(Debug)]")?;
 
     if options.serialize {
         writeln!(dst, "#[derive(serde_repr::Serialize_repr)]")?;
