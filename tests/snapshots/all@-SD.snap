@@ -4,22 +4,24 @@ expression: code
 
 ---
 // GENERATED CODE
-//
-// generated with the following options:
-//     ch2rs ch2rs_test -S -D \
-//         -T 'FixedString(5)=[u8; 5]' \
-//         -T 'Date=u16' \
-//         -T 'DateTime=u32' \
-//         -T 'DateTime(9)=u64' \
-//         -T 'Ipv4=u32' \
-//         -T 'Ipv6=[u8; 16]' \
-//         -T 'UUID=[u8; 16]' \
-//         -T 'Decimal(18, 9)=u64' \
-//         -O 'blob=Vec<u8>' \
-//         -B 'blob'
-
+#![cfg_attr(rustfmt, rustfmt::skip)]
 #![allow(warnings)]
 #![allow(clippy::all)]
+
+// Generated with the following options:
+/*
+ch2rs ch2rs_test -S -D \
+        -T 'FixedString(5)=[u8; 5]' \
+        -T 'Date=u16' \
+        -T 'DateTime=u32' \
+        -T 'DateTime(9)=u64' \
+        -T 'Ipv4=u32' \
+        -T 'Ipv6=[u8; 16]' \
+        -T 'UUID=[u8; 16]' \
+        -T 'Decimal(18, 9)=u64' \
+        -O 'blob=Vec<u8>' \
+        -B 'blob'
+*/
 
 #[derive(Debug, clickhouse::Row)]
 #[derive(serde::Serialize)]

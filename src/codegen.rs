@@ -9,15 +9,12 @@ use crate::{
 };
 
 fn generate_prelude(dst: &mut impl Write, options: &Options) -> Result<()> {
-    writeln!(dst, "// GENERATED CODE\n//")?;
-    writeln!(dst, "// generated with the following options:")?;
-    writeln!(
-        dst,
-        "//     {}\n",
-        options.format().replace("\n", "\n//     ")
-    )?;
+    writeln!(dst, "// GENERATED CODE")?;
+    writeln!(dst, "#![cfg_attr(rustfmt, rustfmt::skip)]")?;
     writeln!(dst, "#![allow(warnings)]")?;
     writeln!(dst, "#![allow(clippy::all)]")?;
+    writeln!(dst, "\n// Generated with the following options:")?;
+    writeln!(dst, "/*\n{}\n*/", options.format().replace("\n", "\n    "))?;
 
     Ok(())
 }
