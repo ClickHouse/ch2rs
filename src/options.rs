@@ -41,7 +41,7 @@ pub struct Options {
     pub bytes: Vec<String>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Type {
     pub sql: SqlType,
     pub type_: String,
@@ -55,7 +55,7 @@ fn parse_type(s: &str) -> Result<Type> {
     })
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Override {
     pub column: String,
     pub type_: String,
@@ -93,15 +93,27 @@ impl Options {
 
         s.push_str(" \\\n");
 
-        for t in &self.types {
+        // -T
+        let mut types = self.types.iter().collect::<Vec<_>>();
+        types.sort();
+
+        for t in types {
             let _ = writeln!(&mut s, "    -T '{}={}' \\", t.sql, t.type_);
         }
 
-        for o in &self.overrides {
+        // -O
+        let mut overrides = self.overrides.iter().collect::<Vec<_>>();
+        overrides.sort();
+
+        for o in overrides {
             let _ = writeln!(&mut s, "    -O '{}={}' \\", o.column, o.type_);
         }
 
-        for b in &self.bytes {
+        // -B
+        let mut bytes = self.bytes.iter().collect::<Vec<_>>();
+        bytes.sort();
+
+        for b in bytes {
             let _ = writeln!(&mut s, "    -B '{}' \\", b);
         }
 
