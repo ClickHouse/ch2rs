@@ -187,5 +187,5 @@ pub fn generate(table: &Table, options: &Options) -> Result<String> {
     generate_row(&mut code, table, options).context("failed to generate a row")?;
     writeln!(code)?;
     generate_enums(&mut code, table, options).context("failed to generate enums")?;
-    Ok(code)
+    Ok(code.trim().to_string())
 }
