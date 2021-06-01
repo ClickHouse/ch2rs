@@ -14,7 +14,7 @@ ch2rs ch2rs_test -D --owned \
         -T 'FixedString(5)=[u8; 5]' \
         -T 'Date=u16' \
         -T 'DateTime=u32' \
-        -T 'DateTime(9)=u64' \
+        -T 'DateTime64(9)=u64' \
         -T 'Ipv4=u32' \
         -T 'Ipv6=[u8; 16]' \
         -T 'UUID=[u8; 16]' \
@@ -73,5 +73,3 @@ pub enum Enum16 {
     Empty = -128,
     FooBar = 1024,
 }
-
-

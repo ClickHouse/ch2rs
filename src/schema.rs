@@ -48,8 +48,8 @@ impl fmt::Display for SqlType {
         match self {
             SqlType::DateTime(Some(tz)) => write!(f, "DateTime({})", tz),
             SqlType::DateTime(None) => f.write_str("DateTime"),
-            SqlType::DateTime64(prec, Some(tz)) => write!(f, "DateTime({}, {})", prec, tz),
-            SqlType::DateTime64(prec, None) => write!(f, "DateTime({})", prec),
+            SqlType::DateTime64(prec, Some(tz)) => write!(f, "DateTime64({}, {})", prec, tz),
+            SqlType::DateTime64(prec, None) => write!(f, "DateTime64({})", prec),
             SqlType::Uuid => f.write_str("UUID"),
             _ => fmt::Debug::fmt(self, f),
         }
