@@ -6,12 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2021-06-01
+### Fixed
+- Format `DateTime64` right way.
+
 ## [0.1.1] - 2021-05-31
 ### Changed
-- use clickhouse v0.7
+- Use clickhouse v0.7
 
 ## [0.1.0] - 2021-05-30
 
-[unreleased]: https://github.com/loyd/clickhouse.rs/compare/v0.1.1...HEAD
+[unreleased]: https://github.com/loyd/clickhouse.rs/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/loyd/clickhouse.rs/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/loyd/clickhouse.rs/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/loyd/clickhouse.rs/releases/tag/v0.1.0
