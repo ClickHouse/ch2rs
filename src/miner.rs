@@ -152,7 +152,7 @@ pub fn parse_type(raw: &str) -> Result<SqlType> {
             }
             // Map(key, value)
             else if let Some(inner) = extract_inner(raw, "Map") {
-                let (key, value) = inner.split_once(", ").context("invalid map")?;
+                let (key, value) = inner.split_once(",").context("invalid map")?;
                 let key = parse_type(key).context("invalid key")?;
                 let value = parse_type(value).context("invalid value")?;
                 SqlType::Map(Box::new(key), Box::new(value))

@@ -14,7 +14,7 @@ pub struct Column {
     pub comment: String,
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub enum SqlType {
     UInt8,
     UInt16,

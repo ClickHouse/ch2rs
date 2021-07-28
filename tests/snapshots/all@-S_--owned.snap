@@ -53,6 +53,8 @@ pub struct Row {
     pub array: Vec<String>,
     pub tuple: (String, String, ),
     pub opt_str: Option<String>,
+    pub map_str: Vec<(String, String, )>,
+    pub map_f32: Vec<(String, f32, )>,
     pub default: u16,
     pub material: u16,
     pub alias: u16,

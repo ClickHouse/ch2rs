@@ -37,6 +37,8 @@ const CREATE_TABLE_DDL: &str = "
         array       Array(LowCardinality(String)),
         tuple       Tuple(String, LowCardinality(String)),
         opt_str     Nullable(String),
+        map_str     Map(String, String),
+        map_f32     Map(String, Float32),
 
         default     DEFAULT u16,
         material    MATERIALIZED u16,
