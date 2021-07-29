@@ -79,6 +79,7 @@ fn make_column(raw: RawColumn) -> Result<Column> {
 }
 
 pub fn parse_type(raw: &str) -> Result<SqlType> {
+    let raw = raw.trim();
     let raw = extract_inner(raw, "LowCardinality").unwrap_or(raw);
 
     // TODO: unwrap `SimpleAggregateFunction`.
@@ -113,10 +114,10 @@ pub fn parse_type(raw: &str) -> Result<SqlType> {
             // DateTime64(prec, tz)
             else if let Some(inner) = extract_inner(raw, "DateTime64") {
                 let (prec, tz) = inner
-                    .split_once(", ")
+                    .split_once(',')
                     .map_or((inner, None), |(p, tz)| (p, Some(tz)));
-                let prec = prec.parse().context("invalid precision")?;
-                SqlType::DateTime64(prec, tz.map(Into::into))
+                let prec = prec.trim().parse().context("invalid precision")?;
+                SqlType::DateTime64(prec, tz.map(str::trim).map(Into::into))
             }
             // Enum8('K' = v, 'K2' = v2)
             else if let Some(inner) = extract_inner(raw, "Enum8") {
@@ -128,9 +129,9 @@ pub fn parse_type(raw: &str) -> Result<SqlType> {
             }
             // Decimal(prec, scale)
             else if let Some(inner) = extract_inner(raw, "Decimal") {
-                let (prec, scale) = inner.split_once(", ").context("invalid decimal")?;
-                let prec = prec.parse().context("invalid prec")?;
-                let scale = scale.parse().context("invalid precision")?;
+                let (prec, scale) = inner.split_once(',').context("invalid decimal")?;
+                let prec = prec.trim().parse().context("invalid prec")?;
+                let scale = scale.trim().parse().context("invalid precision")?;
                 SqlType::Decimal(prec, scale)
             }
             // FixedString(size)
@@ -145,14 +146,14 @@ pub fn parse_type(raw: &str) -> Result<SqlType> {
             else if let Some(inner) = extract_inner(raw, "Tuple") {
                 SqlType::Tuple(
                     inner
-                        .split(", ")
+                        .split(',')
                         .map(|t| parse_type(t))
                         .collect::<Result<Vec<_>>>()?,
                 )
             }
             // Map(key, value)
             else if let Some(inner) = extract_inner(raw, "Map") {
-                let (key, value) = inner.split_once(",").context("invalid map")?;
+                let (key, value) = inner.split_once(',').context("invalid map")?;
                 let key = parse_type(key).context("invalid key")?;
                 let value = parse_type(value).context("invalid value")?;
                 SqlType::Map(Box::new(key), Box::new(value))
