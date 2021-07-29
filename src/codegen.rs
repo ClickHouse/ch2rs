@@ -101,7 +101,10 @@ fn make_type(raw: &SqlType, name: &str, options: &Options) -> Result<String> {
 
             format!("({})", inner)
         }
-        //SqlType::Map(_key, _value) => todo!(),
+        SqlType::Map(key, value) => {
+            let tup = Box::new(SqlType::Tuple(vec![(**key).clone(), (**value).clone()]));
+            make_type(&SqlType::Array(tup), name, options)?
+        }
         SqlType::Nullable(inner) => format!("Option<{}>", make_type(inner, name, options)?),
         _ => bail!(
             "there is no default impl for {}, use -T or -O to specify it",

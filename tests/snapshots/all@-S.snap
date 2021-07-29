@@ -53,6 +53,8 @@ pub struct Row<'a> {
     pub array: Vec<&'a str>,
     pub tuple: (&'a str, &'a str, ),
     pub opt_str: Option<&'a str>,
+    pub map_str: Vec<(&'a str, &'a str, )>,
+    pub map_f32: Vec<(&'a str, f32, )>,
     pub default: u16,
     pub material: u16,
     pub alias: u16,
