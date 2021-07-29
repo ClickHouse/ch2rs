@@ -1,6 +1,6 @@
 [package]
 name = "ch2rs"
-version = "0.1.2"
+version = "0.1.3"
 description = "Generate Rust structs from ClickHouse rows"
 keywords = ["clickhouse", "database", "generator"]
 authors = ["Paul Loyd <pavelko95@gmail.com>"]
@@ -15,7 +15,7 @@ path = "bin/ch2rs.rs"
 
 [dependencies]
 anyhow = "1.0.40"
-clickhouse = "0.7"
+clickhouse = "0.8"
 heck = "0.3.2"
 serde = { version = "1.0.126", features = ["derive"] }
 structopt = "0.3.21"
