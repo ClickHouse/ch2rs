@@ -49,7 +49,9 @@ const CREATE_TABLE_DDL: &str = "
 ";
 
 async fn recreate_table() {
-    let client = Client::default().with_url(URL);
+    let client = Client::default()
+        .with_url(URL)
+        .with_option("allow_experimental_map_type", "1");
 
     client
         .query("DROP TABLE IF EXISTS ch2rs_test")
