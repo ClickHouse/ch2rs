@@ -13,7 +13,7 @@ $ ch2rs --help
 ```
 
 ```
-ch2rs 0.1.0
+ch2rs 0.1.4
 
 USAGE:
     ch2rs [FLAGS] [OPTIONS] <table>
@@ -28,6 +28,7 @@ FLAGS:
 OPTIONS:
     -B <bytes>...            Add `#[serde(with = "serde_bytes")]` to the provided column
     -d <database>            A database where the table is placed in [default: default]
+    -I <ignore>...           Ignore a specified column
     -O <overrides>...        Override the type of the provided column
     -p <password>
     -T <types>...            Override the type, e.g. 'Decimal(18, 9)=fixnum::FixedPoint<i64, typenum::U9>'
