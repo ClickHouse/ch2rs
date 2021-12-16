@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Option `-I` to ignore specified columns.
+- The package's version in generated code.
 
 ## [0.1.3] - 2021-07-29
 ### Added

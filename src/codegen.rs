@@ -9,7 +9,9 @@ use crate::{
 };
 
 fn generate_prelude(dst: &mut impl Write, options: &Options) -> Result<()> {
-    writeln!(dst, "// GENERATED CODE")?;
+    let version = env!("CARGO_PKG_VERSION");
+
+    writeln!(dst, "// GENERATED CODE (ch2rs v{})", version)?;
     writeln!(dst, "#![cfg_attr(rustfmt, rustfmt::skip)]")?;
     writeln!(dst, "#![allow(warnings)]")?;
     writeln!(dst, "#![allow(clippy::all)]")?;
