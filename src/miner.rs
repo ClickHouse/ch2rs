@@ -55,6 +55,10 @@ fn make_table(raw_columns: Vec<RawColumn>, options: &Options) -> Result<Table> {
     let mut columns = Vec::new();
 
     for raw_column in raw_columns {
+        if options.ignore.contains(&raw_column.name) {
+            continue;
+        }
+
         let reason = format!("failed to handle the `{}` column", raw_column.name);
         let column = make_column(raw_column).context(reason)?;
         columns.push(column);
@@ -147,7 +151,7 @@ pub fn parse_type(raw: &str) -> Result<SqlType> {
                 SqlType::Tuple(
                     inner
                         .split(',')
-                        .map(|t| parse_type(t))
+                        .map(parse_type)
                         .collect::<Result<Vec<_>>>()?,
                 )
             }

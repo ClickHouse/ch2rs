@@ -20,7 +20,8 @@ ch2rs ch2rs_test -D \
         -T 'UUID=[u8; 16]' \
         -T 'Decimal(18, 9)=u64' \
         -O 'blob=Vec<u8>' \
-        -B 'blob'
+        -B 'blob' \
+        -I 'ignored'
 */
 
 #[derive(Debug, clickhouse::Row)]

@@ -39,6 +39,9 @@ pub struct Options {
     /// Add `#[serde(with = "serde_bytes")]` to the provided column.
     #[structopt(short = "B")]
     pub bytes: Vec<String>,
+    /// Ignore a specified column.
+    #[structopt(short = "I", number_of_values = 1)]
+    pub ignore: Vec<String>,
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -115,6 +118,14 @@ impl Options {
 
         for b in bytes {
             let _ = writeln!(&mut s, "    -B '{}' \\", b);
+        }
+
+        // -I
+        let mut ignore = self.ignore.iter().collect::<Vec<_>>();
+        ignore.sort();
+
+        for i in ignore {
+            let _ = writeln!(&mut s, "    -I '{}' \\", i);
         }
 
         s.trim_end_matches(|c| c == '\\' || c == ' ' || c == '\n')

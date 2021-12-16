@@ -8,7 +8,6 @@ use structopt::StructOpt;
 
 const URL: &str = "http://localhost:8123";
 
-// TODO: check `Map`.
 const CREATE_TABLE_DDL: &str = "
     CREATE TABLE ch2rs_test (
         u8          UInt8,
@@ -42,7 +41,9 @@ const CREATE_TABLE_DDL: &str = "
 
         default     DEFAULT u16,
         material    MATERIALIZED u16,
-        alias       ALIAS u16
+        alias       ALIAS u16,
+
+        ignored     Int8
     )
         ENGINE = MergeTree
         ORDER BY u8
@@ -104,6 +105,8 @@ async fn generate_all() {
                 "blob=Vec<u8>",
                 "-B",
                 "blob",
+                "-I",
+                "ignored",
             ];
             let args = args.into_iter().filter(|s| !s.is_empty()).collect();
             let tmp = format!("{}_{}", t1, t2);
