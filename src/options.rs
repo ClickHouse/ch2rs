@@ -50,7 +50,7 @@ pub struct Type {
 fn parse_type(s: &str) -> Result<Type> {
     let (sql, type_) = s.split_once('=').context("invalid key-value")?;
     Ok(Type {
-        sql: crate::miner::parse_type(&sql)?,
+        sql: crate::miner::parse_type(sql)?,
         type_: type_.into(),
     })
 }
