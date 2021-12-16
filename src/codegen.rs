@@ -116,10 +116,10 @@ fn make_type(raw: &SqlType, name: &str, options: &Options) -> Result<String> {
 fn generate_enums(dst: &mut impl Write, table: &Table, options: &Options) -> Result<()> {
     fn find_enum(t: &SqlType) -> Option<(bool, &[(String, i32)])> {
         match t {
-            SqlType::Enum8(v) => Some((false, &v)),
-            SqlType::Enum16(v) => Some((true, &v)),
+            SqlType::Enum8(v) => Some((false, v)),
+            SqlType::Enum16(v) => Some((true, v)),
             SqlType::Array(inner) => find_enum(inner),
-            SqlType::Tuple(inner) => inner.iter().flat_map(|i| find_enum(i)).next(),
+            SqlType::Tuple(inner) => inner.iter().flat_map(find_enum).next(),
             SqlType::Nullable(inner) => find_enum(inner),
             _ => None,
         }
