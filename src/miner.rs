@@ -1,4 +1,4 @@
-use anyhow::{bail, Context, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use clickhouse::{Client, Row};
 use serde::Deserialize;
 
@@ -84,9 +84,21 @@ fn make_column(raw: RawColumn) -> Result<Column> {
 
 pub fn parse_type(raw: &str) -> Result<SqlType> {
     let raw = raw.trim();
-    let raw = extract_inner(raw, "LowCardinality").unwrap_or(raw);
 
-    // TODO: unwrap `SimpleAggregateFunction`.
+    let raw = if let Some(args) = extract_inner(raw, "SimpleAggregateFunction") {
+        let mut tokens = args.split(", ").skip(1);
+        let type1 = tokens
+            .next()
+            .ok_or_else(|| anyhow!("single-arg SimpleAggregateFunction"))?;
+        if tokens.next().is_some() {
+            bail!("more than 2 args aren't supported in SimpleAggregateFunction");
+        }
+        type1
+    } else {
+        raw
+    };
+
+    let raw = extract_inner(raw, "LowCardinality").unwrap_or(raw);
 
     Ok(match raw {
         "UInt8" => SqlType::UInt8,
