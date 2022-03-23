@@ -16,7 +16,7 @@ fn generate_prelude(dst: &mut impl Write, options: &Options) -> Result<()> {
     writeln!(dst, "#![allow(warnings)]")?;
     writeln!(dst, "#![allow(clippy::all)]")?;
     writeln!(dst, "\n// Generated with the following options:")?;
-    writeln!(dst, "/*\n{}\n*/", options.format().replace("\n", "\n    "))?;
+    writeln!(dst, "/*\n{}\n*/", options.format().replace('\n', "\n    "))?;
 
     Ok(())
 }
