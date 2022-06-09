@@ -73,7 +73,7 @@ async fn run_one(args: Vec<&str>) {
     let code = ch2rs::generate(options)
         .await
         .expect("failed to generate a struct");
-    insta::assert_snapshot!(code);
+    insta::assert_snapshot!("all", code);
 }
 
 async fn generate_all() {
