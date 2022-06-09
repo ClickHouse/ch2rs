@@ -24,6 +24,7 @@ pub enum SqlType {
     Int16,
     Int32,
     Int64,
+    Bool,
     String,
     FixedString(u32),
     Float32,

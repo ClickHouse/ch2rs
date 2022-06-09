@@ -6,9 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `Bool` support.
+
 ## [0.1.5] - 2022-01-25
 ### Added
-- SimpleAggregateFunctions support ([@injecto](https://github.com/injecto)).
+- `SimpleAggregateFunctions` support ([@injecto](https://github.com/injecto)).
 
 ## [0.1.4] - 2021-12-16
 ### Added

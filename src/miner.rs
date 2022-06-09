@@ -109,6 +109,7 @@ pub fn parse_type(raw: &str) -> Result<SqlType> {
         "Int16" => SqlType::Int16,
         "Int32" => SqlType::Int32,
         "Int64" => SqlType::Int64,
+        "Bool" => SqlType::Bool,
         "String" => SqlType::String,
         "Float32" => SqlType::Float32,
         "Float64" => SqlType::Float64,

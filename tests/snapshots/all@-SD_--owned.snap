@@ -36,6 +36,7 @@ pub struct Row {
     pub i16: i16,
     pub i32: i32,
     pub i64: i64,
+    pub bool: bool,
     pub str: String,
     pub low_str: String,
     #[serde(with = "serde_bytes")]

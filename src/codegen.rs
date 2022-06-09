@@ -81,6 +81,7 @@ fn make_type(raw: &SqlType, name: &str, options: &Options) -> Result<String> {
         SqlType::Int16 => "i16".into(),
         SqlType::Int32 => "i32".into(),
         SqlType::Int64 => "i64".into(),
+        SqlType::Bool => "bool".into(),
         SqlType::String if options.owned => "String".into(),
         SqlType::String => "&'a str".into(),
         //SqlType::FixedString(size) => todo!(),
