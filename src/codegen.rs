@@ -65,6 +65,7 @@ fn generate_field(dst: &mut impl Write, column: &Column, options: &Options) -> R
 
 fn make_attribute(column: &Column, options: &Options) -> Option<String> {
     if options.bytes.iter().any(|b| b == &column.name) {
+        // Works also for `Option<_>`.
         return Some(r#"    #[serde(with = "serde_bytes")]"#.into());
     }
 
@@ -73,15 +74,18 @@ fn make_attribute(column: &Column, options: &Options) -> Option<String> {
         return None;
     }
 
-    if column.type_ == SqlType::UUID {
-        return Some(r#"    #[serde(with = "::clickhouse::serde::uuid")]"#.into());
-    }
+    let attr = match column.type_ {
+        SqlType::UUID => r#"    #[serde(with = "::clickhouse::serde::uuid")]"#,
+        SqlType::IPv4 => r#"    #[serde(with = "::clickhouse::serde::ipv4")]"#,
+        SqlType::Nullable(ref inner) => match inner.as_ref() {
+            SqlType::UUID => r#"    #[serde(with = "::clickhouse::serde::uuid::option")]"#,
+            SqlType::IPv4 => r#"    #[serde(with = "::clickhouse::serde::ipv4::option")]"#,
+            _ => return None,
+        },
+        _ => return None,
+    };
 
-    if column.type_ == SqlType::IPv4 {
-        return Some(r#"    #[serde(with = "::clickhouse::serde::ipv4")]"#.into());
-    }
-
-    None
+    Some(attr.into())
 }
 
 fn make_type(column: &Column, options: &Options) -> Result<String> {

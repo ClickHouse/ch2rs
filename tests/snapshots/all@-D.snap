@@ -44,15 +44,19 @@ pub struct Row<'a> {
     pub dt64: u64,
     #[serde(with = "::clickhouse::serde::ipv4")]
     pub ipv4: ::std::net::Ipv4Addr,
+    #[serde(with = "::clickhouse::serde::ipv4::option")]
+    pub ipv4_opt: Option<::std::net::Ipv4Addr>,
     pub ipv6: ::std::net::Ipv6Addr,
     #[serde(with = "::clickhouse::serde::uuid")]
     pub uuid: ::uuid::Uuid,
+    #[serde(with = "::clickhouse::serde::uuid::option")]
+    pub uuid_opt: Option<::uuid::Uuid>,
     pub dec64: u64,
     pub enum8: Enum8,
     pub enum16: Enum16,
     pub array: Vec<&'a str>,
     pub tuple: (&'a str, &'a str, ),
-    pub opt_str: Option<&'a str>,
+    pub str_opt: Option<&'a str>,
     pub map_str: Vec<(&'a str, &'a str, )>,
     pub map_f32: Vec<(&'a str, f32, )>,
     pub default: u16,
