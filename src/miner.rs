@@ -115,9 +115,9 @@ pub fn parse_type(raw: &str) -> Result<SqlType> {
         "Float64" => SqlType::Float64,
         "Date" => SqlType::Date,
         "DateTime" => SqlType::DateTime(None),
-        "IPv4" => SqlType::Ipv4,
-        "IPv6" => SqlType::Ipv6,
-        "UUID" => SqlType::Uuid,
+        "IPv4" => SqlType::IPv4,
+        "IPv6" => SqlType::IPv6,
+        "UUID" => SqlType::UUID,
         _ => {
             // Nullable(type)
             if let Some(inner) = extract_inner(raw, "Nullable") {

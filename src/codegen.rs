@@ -73,7 +73,7 @@ fn make_attribute(column: &Column, options: &Options) -> Option<String> {
         return None;
     }
 
-    if column.type_ == SqlType::Uuid {
+    if column.type_ == SqlType::UUID {
         return Some(r#"    #[serde(with = "::clickhouse::serde::uuid")]"#.into());
     }
 
@@ -109,7 +109,7 @@ fn do_make_type(name: &str, sql_type: &SqlType, options: &Options) -> Result<Str
         //SqlType::DateTime64(_, _) => todo!(),
         //SqlType::Ipv4 => todo!(),
         //SqlType::Ipv6 => todo!(),
-        SqlType::Uuid => "::uuid::Uuid".into(),
+        SqlType::UUID => "::uuid::Uuid".into(),
         //SqlType::Decimal(_prec, _scale) => todo!(),
         SqlType::Enum8(_) | SqlType::Enum16(_) => name.to_camel_case(),
         SqlType::Array(inner) => format!("Vec<{}>", do_make_type(name, inner, options)?),

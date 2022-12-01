@@ -15,6 +15,7 @@ pub struct Column {
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
+#[allow(clippy::upper_case_acronyms)]
 pub enum SqlType {
     UInt8,
     UInt16,
@@ -32,9 +33,9 @@ pub enum SqlType {
     Date,
     DateTime(Option<String>),
     DateTime64(u32, Option<String>),
-    Ipv4,
-    Ipv6,
-    Uuid,
+    IPv4,
+    IPv6,
+    UUID,
     Decimal(u32, u32),
     Enum8(Vec<(String, i32)>),
     Enum16(Vec<(String, i32)>),
@@ -51,7 +52,6 @@ impl fmt::Display for SqlType {
             SqlType::DateTime(None) => f.write_str("DateTime"),
             SqlType::DateTime64(prec, Some(tz)) => write!(f, "DateTime64({}, {})", prec, tz),
             SqlType::DateTime64(prec, None) => write!(f, "DateTime64({})", prec),
-            SqlType::Uuid => f.write_str("UUID"),
             _ => fmt::Debug::fmt(self, f),
         }
     }

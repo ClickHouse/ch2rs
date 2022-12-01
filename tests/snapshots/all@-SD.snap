@@ -14,8 +14,8 @@ ch2rs ch2rs_test -S -D \
         -T 'Date=u16' \
         -T 'DateTime=u32' \
         -T 'DateTime64(9)=u64' \
-        -T 'Ipv4=u32' \
-        -T 'Ipv6=[u8; 16]' \
+        -T 'IPv4=u32' \
+        -T 'IPv6=[u8; 16]' \
         -T 'Decimal(18, 9)=u64' \
         -O 'blob=Vec<u8>' \
         -B 'blob' \

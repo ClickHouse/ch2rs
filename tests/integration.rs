@@ -18,7 +18,7 @@ const CREATE_TABLE_DDL: &str = "
         i16         Int16,
         i32         Int32,
         i64         Int64,
-        bool        Bool,
+        bool        Boolean,
         str         String,
         low_str     LowCardinality(String),
         blob        String,
