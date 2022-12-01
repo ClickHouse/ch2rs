@@ -14,8 +14,6 @@ ch2rs ch2rs_test -D \
         -T 'Date=u16' \
         -T 'DateTime=u32' \
         -T 'DateTime64(9)=u64' \
-        -T 'IPv4=u32' \
-        -T 'IPv6=[u8; 16]' \
         -T 'Decimal(18, 9)=u64' \
         -O 'blob=Vec<u8>' \
         -B 'blob' \
@@ -44,8 +42,9 @@ pub struct Row<'a> {
     pub d: u16,
     pub dt: u32,
     pub dt64: u64,
-    pub ipv4: u32,
-    pub ipv6: [u8; 16],
+    #[serde(with = "::clickhouse::serde::ipv4")]
+    pub ipv4: ::std::net::Ipv4Addr,
+    pub ipv6: ::std::net::Ipv6Addr,
     #[serde(with = "::clickhouse::serde::uuid")]
     pub uuid: ::uuid::Uuid,
     pub dec64: u64,

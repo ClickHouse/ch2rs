@@ -77,6 +77,10 @@ fn make_attribute(column: &Column, options: &Options) -> Option<String> {
         return Some(r#"    #[serde(with = "::clickhouse::serde::uuid")]"#.into());
     }
 
+    if column.type_ == SqlType::IPv4 {
+        return Some(r#"    #[serde(with = "::clickhouse::serde::ipv4")]"#.into());
+    }
+
     None
 }
 
@@ -107,8 +111,8 @@ fn do_make_type(name: &str, sql_type: &SqlType, options: &Options) -> Result<Str
         //SqlType::Date => todo!(),
         //SqlType::DateTime(_) => todo!(),
         //SqlType::DateTime64(_, _) => todo!(),
-        //SqlType::Ipv4 => todo!(),
-        //SqlType::Ipv6 => todo!(),
+        SqlType::IPv4 => "::std::net::Ipv4Addr".into(),
+        SqlType::IPv6 => "::std::net::Ipv6Addr".into(),
         SqlType::UUID => "::uuid::Uuid".into(),
         //SqlType::Decimal(_prec, _scale) => todo!(),
         SqlType::Enum8(_) | SqlType::Enum16(_) => name.to_camel_case(),
