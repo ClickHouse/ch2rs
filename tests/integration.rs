@@ -99,8 +99,6 @@ async fn generate_all() {
                 "-T",
                 "IPv6=[u8; 16]",
                 "-T",
-                "UUID=[u8; 16]",
-                "-T",
                 "Decimal(18, 9)=u64",
                 "-O",
                 "blob=Vec<u8>",

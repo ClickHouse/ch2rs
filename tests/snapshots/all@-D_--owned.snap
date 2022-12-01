@@ -1,7 +1,6 @@
 ---
 source: tests/integration.rs
 expression: code
-
 ---
 // GENERATED CODE (ch2rs v0.1.6)
 #![cfg_attr(rustfmt, rustfmt::skip)]
@@ -17,7 +16,6 @@ ch2rs ch2rs_test -D --owned \
         -T 'DateTime64(9)=u64' \
         -T 'Ipv4=u32' \
         -T 'Ipv6=[u8; 16]' \
-        -T 'UUID=[u8; 16]' \
         -T 'Decimal(18, 9)=u64' \
         -O 'blob=Vec<u8>' \
         -B 'blob' \
@@ -48,7 +46,8 @@ pub struct Row {
     pub dt64: u64,
     pub ipv4: u32,
     pub ipv6: [u8; 16],
-    pub uuid: [u8; 16],
+    #[serde(with = "::clickhouse::serde::uuid")]
+    pub uuid: ::uuid::Uuid,
     pub dec64: u64,
     pub enum8: Enum8,
     pub enum16: Enum16,

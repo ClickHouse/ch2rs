@@ -52,27 +52,44 @@ fn generate_row(dst: &mut impl Write, table: &Table, options: &Options) -> Resul
 }
 
 fn generate_field(dst: &mut impl Write, column: &Column, options: &Options) -> Result<()> {
-    let name = column.name.to_snake_case();
-    let type_ = make_type(&column.type_, &column.name, options)?;
-
-    if options.bytes.iter().any(|b| b == &column.name) {
-        writeln!(dst, r#"    #[serde(with = "serde_bytes")]"#)?;
+    if let Some(attr) = make_attribute(column, options) {
+        writeln!(dst, "{}", attr)?;
     }
+
+    let name = column.name.to_snake_case();
+    let type_ = make_type(column, options)?;
 
     writeln!(dst, "    pub {}: {},", name, type_)?;
     Ok(())
 }
 
-fn make_type(raw: &SqlType, name: &str, options: &Options) -> Result<String> {
-    if let Some(o) = options.overrides.iter().find(|o| o.column == name) {
-        return Ok(o.type_.clone());
+fn make_attribute(column: &Column, options: &Options) -> Option<String> {
+    if options.bytes.iter().any(|b| b == &column.name) {
+        return Some(r#"    #[serde(with = "serde_bytes")]"#.into());
     }
 
-    if let Some(t) = options.types.iter().find(|t| &t.sql == raw) {
-        return Ok(t.type_.clone());
+    // Add nothing if the column is overrided by name or type.
+    if find_override(&column.name, &column.type_, options).is_some() {
+        return None;
     }
 
-    Ok(match raw {
+    if column.type_ == SqlType::Uuid {
+        return Some(r#"    #[serde(with = "::clickhouse::serde::uuid")]"#.into());
+    }
+
+    None
+}
+
+fn make_type(column: &Column, options: &Options) -> Result<String> {
+    do_make_type(&column.name, &column.type_, options)
+}
+
+fn do_make_type(name: &str, sql_type: &SqlType, options: &Options) -> Result<String> {
+    if let Some(type_) = find_override(name, sql_type, options) {
+        return Ok(type_.into());
+    }
+
+    Ok(match sql_type {
         SqlType::UInt8 => "u8".into(),
         SqlType::UInt16 => "u16".into(),
         SqlType::UInt32 => "u32".into(),
@@ -92,28 +109,42 @@ fn make_type(raw: &SqlType, name: &str, options: &Options) -> Result<String> {
         //SqlType::DateTime64(_, _) => todo!(),
         //SqlType::Ipv4 => todo!(),
         //SqlType::Ipv6 => todo!(),
-        //SqlType::Uuid => todo!(),
+        SqlType::Uuid => "::uuid::Uuid".into(),
         //SqlType::Decimal(_prec, _scale) => todo!(),
         SqlType::Enum8(_) | SqlType::Enum16(_) => name.to_camel_case(),
-        SqlType::Array(inner) => format!("Vec<{}>", make_type(inner, name, options)?),
+        SqlType::Array(inner) => format!("Vec<{}>", do_make_type(name, inner, options)?),
         SqlType::Tuple(inner) => {
             let inner = inner
                 .iter()
-                .map(|i| make_type(i, name, options).map(|t| format!("{}, ", t)))
+                .map(|i| do_make_type(name, i, options).map(|t| format!("{}, ", t)))
                 .collect::<Result<String>>()?;
 
             format!("({})", inner)
         }
         SqlType::Map(key, value) => {
             let tup = Box::new(SqlType::Tuple(vec![(**key).clone(), (**value).clone()]));
-            make_type(&SqlType::Array(tup), name, options)?
+            do_make_type(name, &SqlType::Array(tup), options)?
         }
-        SqlType::Nullable(inner) => format!("Option<{}>", make_type(inner, name, options)?),
+        SqlType::Nullable(inner) => format!("Option<{}>", do_make_type(name, inner, options)?),
         _ => bail!(
             "there is no default impl for {}, use -T or -O to specify it",
-            raw
+            sql_type
         ),
     })
+}
+
+fn find_override<'a>(name: &str, sql_type: &SqlType, options: &'a Options) -> Option<&'a str> {
+    // Find override by a column's name.
+    if let Some(o) = options.overrides.iter().find(|o| o.column == name) {
+        return Some(&o.type_);
+    }
+
+    // Find override by SQL type.
+    if let Some(t) = options.types.iter().find(|t| &t.sql == sql_type) {
+        return Some(&t.type_);
+    }
+
+    None
 }
 
 fn generate_enums(dst: &mut impl Write, table: &Table, options: &Options) -> Result<()> {

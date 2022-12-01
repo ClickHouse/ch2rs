@@ -15,7 +15,7 @@ path = "bin/ch2rs.rs"
 
 [dependencies]
 anyhow = "1.0.40"
-clickhouse = "0.10"
+clickhouse = "0.11"
 heck = "0.3.2"
 serde = { version = "1.0.126", features = ["derive"] }
 structopt = "0.3.21"
@@ -26,3 +26,5 @@ insta = "1.14.1"
 serde_repr = "0.1.7"
 serde_bytes = "0.11.5"
 trybuild = "1.0.42"
+uuid = "1.2.1"
+clickhouse = { version = "0.11.1", features = ["uuid"] }
