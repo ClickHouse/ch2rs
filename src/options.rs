@@ -42,6 +42,9 @@ pub struct Options {
     /// Ignore a specified column.
     #[structopt(short = "I", number_of_values = 1)]
     pub ignore: Vec<String>,
+
+    #[structopt(short = "i", number_of_values = 1)]
+    pub derives: Vec<String>,
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
