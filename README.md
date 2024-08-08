@@ -15,7 +15,7 @@ $ ch2rs --help
 ```
 
 ```
-ch2rs 0.1.6
+ch2rs 0.1.7
 
 USAGE:
     ch2rs [FLAGS] [OPTIONS] <table>

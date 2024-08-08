@@ -2,7 +2,7 @@
 source: tests/integration.rs
 expression: code
 ---
-// GENERATED CODE (ch2rs v0.1.6)
+// GENERATED CODE (ch2rs v0.1.7)
 #![cfg_attr(rustfmt, rustfmt::skip)]
 #![allow(warnings)]
 #![allow(clippy::all)]
