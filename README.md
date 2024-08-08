@@ -1,5 +1,7 @@
 # ch2rs
 
+An auxiliary utility for generating Rust structures from ClickHouse DB schemas for the official [clickhouse-rs](https://github.com/ClickHouse/clickhouse-rs) crate.
+
 ## Usage
 
 ```sh
@@ -26,13 +28,14 @@ FLAGS:
     -V, --version    Prints version information
 
 OPTIONS:
-    -B <bytes>...            Add `#[serde(with = "serde_bytes")]` to the provided column
-    -d <database>            A database where the table is placed in [default: default]
-    -I <ignore>...           Ignore a specified column
-    -O <overrides>...        Override the type of the provided column
+    -B <bytes>...              Add `#[serde(with = "serde_bytes")]` to the provided column
+    -d <database>              A database where the table is placed in [default: default]
+    -I <ignore>...             Ignore a specified column
+    -O <overrides>...          Override the type of the provided column
     -p <password>
-    -T <types>...            Override the type, e.g. 'Decimal(18, 9)=fixnum::FixedPoint<i64, typenum::U9>'
-    -U <url>                 ClickHouse server's URL [default: localhost:8123]
+        --derive <trait>...    Add `#[derive(<trait>)]` to the generated types
+    -T <types>...              Override the type, e.g. 'Decimal(18, 9)=fixnum::FixedPoint<i64, typenum::U9>'
+    -U <url>                   ClickHouse server's URL [default: localhost:8123]
     -u <user>
 
 ARGS:

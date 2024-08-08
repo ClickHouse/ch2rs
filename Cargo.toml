@@ -3,11 +3,11 @@ name = "ch2rs"
 version = "0.1.6"
 description = "Generate Rust structs from ClickHouse rows"
 keywords = ["clickhouse", "database", "generator"]
-authors = ["Paul Loyd <pavelko95@gmail.com>"]
-repository = "https://github.com/loyd/ch2rs"
+authors = ["ClickHouse Contributors", "Paul Loyd <pavelko95@gmail.com>"]
+repository = "https://github.com/ClickHouse/ch2rs"
 license = "MIT"
 readme = "README.md"
-edition = "2018"
+edition = "2021"
 
 [[bin]]
 name = "ch2rs"
@@ -15,8 +15,8 @@ path = "bin/ch2rs.rs"
 
 [dependencies]
 anyhow = "1.0.40"
-clickhouse = "0.11"
-heck = "0.3.2"
+clickhouse = "0.12.1"
+heck = "0.5.0"
 serde = { version = "1.0.126", features = ["derive"] }
 structopt = "0.3.21"
 tokio = { version = "1.6.0", features = ["macros"] }
@@ -27,4 +27,4 @@ serde_repr = "0.1.7"
 serde_bytes = "0.11.5"
 trybuild = "1.0.42"
 uuid = "1.2.1"
-clickhouse = { version = "0.11.1", features = ["uuid"] }
+clickhouse = { version = "0.12.1", features = ["uuid"] }

@@ -1,7 +1,7 @@
 use std::fmt::Write;
 
 use anyhow::{bail, Context, Result};
-use heck::{CamelCase, SnakeCase};
+use heck::{ToSnakeCase, ToUpperCamelCase};
 
 use crate::{
     options::Options,
@@ -129,7 +129,7 @@ fn do_make_type(name: &str, sql_type: &SqlType, options: &Options) -> Result<Str
         SqlType::IPv6 => "::std::net::Ipv6Addr".into(),
         SqlType::UUID => "::uuid::Uuid".into(),
         //SqlType::Decimal(_prec, _scale) => todo!(),
-        SqlType::Enum8(_) | SqlType::Enum16(_) => name.to_camel_case(),
+        SqlType::Enum8(_) | SqlType::Enum16(_) => name.to_upper_camel_case(),
         SqlType::Array(inner) => format!("Vec<{}>", do_make_type(name, inner, options)?),
         SqlType::Tuple(inner) => {
             let inner = inner
@@ -181,7 +181,7 @@ fn generate_enums(dst: &mut impl Write, table: &Table, options: &Options) -> Res
         if let Some((is_extended, variants)) = find_enum(&column.type_) {
             generate_enum(
                 dst,
-                &column.name.to_camel_case(),
+                &column.name.to_upper_camel_case(),
                 is_extended,
                 variants,
                 options,
@@ -235,7 +235,7 @@ fn prepare_name_ident(name: &str) -> String {
     if name.trim().is_empty() {
         "Empty".into()
     } else {
-        name.to_camel_case()
+        name.to_upper_camel_case()
     }
 }
 

@@ -6,13 +6,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Option `--derive` to add custom `#[derive]` attributes to generated structs ([#7]).
+- Use column comment as a doc for the generated fields ([#8]).
+
+[#8]: https://github.com/ClickHouse/ch2rs/pull/8
+[#7]: https://github.com/ClickHouse/ch2rs/pull/7
+
 ## [0.1.6] - 2022-06-09
 ### Added
 - `Bool` support.
 
 ## [0.1.5] - 2022-01-25
 ### Added
-- `SimpleAggregateFunctions` support ([@injecto](https://github.com/injecto)).
+- `SimpleAggregateFunctions` support ([#2], [#3]).
+
+[#3]: https://github.com/ClickHouse/ch2rs/pull/3
+[#2]: https://github.com/ClickHouse/ch2rs/pull/2
 
 ## [0.1.4] - 2021-12-16
 ### Added
@@ -21,7 +31,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.3] - 2021-07-29
 ### Added
-- Support `Map(K, V)` types ([@kcking](https://github.com/kcking)).
+- Support `Map(K, V)` types ([#1]).
+
+[#1]: https://github.com/ClickHouse/ch2rs/pull/1
 
 ## [0.1.2] - 2021-06-01
 ### Fixed
@@ -33,11 +45,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.0] - 2021-05-30
 
-[unreleased]: https://github.com/loyd/clickhouse.rs/compare/v0.1.6...HEAD
-[0.1.6]: https://github.com/loyd/clickhouse.rs/compare/v0.1.5...v0.1.6
-[0.1.5]: https://github.com/loyd/clickhouse.rs/compare/v0.1.4...v0.1.5
-[0.1.4]: https://github.com/loyd/clickhouse.rs/compare/v0.1.3...v0.1.4
-[0.1.3]: https://github.com/loyd/clickhouse.rs/compare/v0.1.2...v0.1.3
-[0.1.2]: https://github.com/loyd/clickhouse.rs/compare/v0.1.1...v0.1.2
-[0.1.1]: https://github.com/loyd/clickhouse.rs/compare/v0.1.0...v0.1.1
-[0.1.0]: https://github.com/loyd/clickhouse.rs/releases/tag/v0.1.0
+[unreleased]: https://github.com/ClickHouse/clickhouse.rs/compare/v0.1.6...HEAD
+[0.1.6]: https://github.com/ClickHouse/clickhouse.rs/compare/v0.1.5...v0.1.6
+[0.1.5]: https://github.com/ClickHouse/clickhouse.rs/compare/v0.1.4...v0.1.5
+[0.1.4]: https://github.com/ClickHouse/clickhouse.rs/compare/v0.1.3...v0.1.4
+[0.1.3]: https://github.com/ClickHouse/clickhouse.rs/compare/v0.1.2...v0.1.3
+[0.1.2]: https://github.com/ClickHouse/clickhouse.rs/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/ClickHouse/clickhouse.rs/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/ClickHouse/clickhouse.rs/releases/tag/v0.1.0
