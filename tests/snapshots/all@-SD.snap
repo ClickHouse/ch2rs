@@ -10,6 +10,8 @@ expression: code
 // Generated with the following options:
 /*
 ch2rs ch2rs_test -S -D \
+        --derive Clone \
+        --derive PartialEq \
         -T 'FixedString(5)=[u8; 5]' \
         -T 'Date=u16' \
         -T 'DateTime=u32' \
@@ -23,6 +25,8 @@ ch2rs ch2rs_test -S -D \
 #[derive(Debug, clickhouse::Row)]
 #[derive(serde::Serialize)]
 #[derive(serde::Deserialize)]
+#[derive(Clone)]
+#[derive(PartialEq)]
 pub struct Row<'a> {
     pub u8: u8,
     pub u16: u16,
@@ -70,6 +74,8 @@ pub struct Row<'a> {
 #[derive(Debug)]
 #[derive(serde_repr::Serialize_repr)]
 #[derive(serde_repr::Deserialize_repr)]
+#[derive(Clone)]
+#[derive(PartialEq)]
 #[repr(i8)]
 pub enum Enum8 {
     Empty = -128,
@@ -79,6 +85,8 @@ pub enum Enum8 {
 #[derive(Debug)]
 #[derive(serde_repr::Serialize_repr)]
 #[derive(serde_repr::Deserialize_repr)]
+#[derive(Clone)]
+#[derive(PartialEq)]
 #[repr(i16)]
 pub enum Enum16 {
     Empty = -128,
