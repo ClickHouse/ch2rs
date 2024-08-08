@@ -64,11 +64,7 @@ fn make_table(raw_columns: Vec<RawColumn>, options: &Options) -> Result<Table> {
         columns.push(column);
     }
 
-    Ok(Table {
-        database: options.database.clone(),
-        name: options.table.clone(),
-        columns,
-    })
+    Ok(Table { columns })
 }
 
 fn make_column(raw: RawColumn) -> Result<Column> {

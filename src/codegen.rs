@@ -63,6 +63,10 @@ fn generate_field(dst: &mut impl Write, column: &Column, options: &Options) -> R
     let name = column.name.to_snake_case();
     let type_ = make_type(column, options)?;
 
+    for comment_line in column.comment.lines() {
+        writeln!(dst, "    /// {}", comment_line)?;
+    }
+
     writeln!(dst, "    pub {}: {},", name, type_)?;
     Ok(())
 }
