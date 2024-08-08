@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.6] - 2022-06-09
 ### Added
-- `Bool` support.
+- Support `Bool`, `IPv4`, `IPv6`, `UUID`, `i128`, `u128` types.
 
 ## [0.1.5] - 2022-01-25
 ### Added
