@@ -42,8 +42,8 @@ pub struct Options {
     /// Ignore a specified column.
     #[structopt(short = "I", number_of_values = 1)]
     pub ignore: Vec<String>,
-
-    #[structopt(short = "i", number_of_values = 1)]
+    /// Add `#[derive(<derive-macro>)]` to the generated types.
+    #[structopt(long = "derive", number_of_values = 1, name = "derive-macro")]
     pub derives: Vec<String>,
 }
 
