@@ -14,7 +14,7 @@ fn make_client(options: &Options) -> Client {
         options.url.clone()
     };
 
-    let mut client = Client::default().with_url(&url);
+    let mut client = Client::default().with_url(url);
 
     if let Some(user) = &options.user {
         client = client.with_user(user);

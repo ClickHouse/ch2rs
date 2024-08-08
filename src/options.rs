@@ -30,7 +30,8 @@ pub struct Options {
     /// Generate only owned types.
     #[structopt(long)]
     pub owned: bool,
-    /// Override the type, e.g. 'Decimal(18, 9)=fixnum::FixedPoint<i64, typenum::U9>'
+    /// Override the type,
+    /// e.g. 'Decimal(18, 9)=fixnum::FixedPoint<i64, typenum::U9>'
     #[structopt(short = "T", parse(try_from_str = parse_type), number_of_values = 1)]
     pub types: Vec<Type>,
     /// Override the type of the provided column.
