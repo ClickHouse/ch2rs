@@ -42,6 +42,9 @@ pub struct Options {
     /// Ignore a specified column.
     #[structopt(short = "I", number_of_values = 1)]
     pub ignore: Vec<String>,
+    /// Add `#[derive(<derive-macro>)]` to the generated types.
+    #[structopt(long = "derive", number_of_values = 1, name = "derive-macro")]
+    pub derives: Vec<String>,
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -95,6 +98,14 @@ impl Options {
         }
 
         s.push_str(" \\\n");
+
+        if !self.derives.is_empty() {
+            for derive in &self.derives {
+                s.push_str("    --derive ");
+                s.push_str(derive);
+                s.push_str(" \\\n");
+            }
+        }
 
         // -T
         let mut types = self.types.iter().collect::<Vec<_>>();

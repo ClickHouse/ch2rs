@@ -32,6 +32,10 @@ fn generate_row(dst: &mut impl Write, table: &Table, options: &Options) -> Resul
         writeln!(dst, "#[derive(serde::Deserialize)]")?;
     }
 
+    for derive in &options.derives {
+        writeln!(dst, "#[derive({})]", derive)?;
+    }
+
     let mut buffer = String::new();
 
     for column in &table.columns {
@@ -200,6 +204,10 @@ fn generate_enum(
 
     if options.deserialize {
         writeln!(dst, "#[derive(serde_repr::Deserialize_repr)]")?;
+    }
+
+    for derive in &options.derives {
+        writeln!(dst, "#[derive({})]", derive)?;
     }
 
     if is_extended {

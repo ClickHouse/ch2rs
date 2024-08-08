@@ -106,6 +106,10 @@ async fn generate_all() {
                 "blob",
                 "-I",
                 "ignored",
+                "--derive",
+                "Clone",
+                "--derive",
+                "PartialEq",
             ];
             let args = args.into_iter().filter(|s| !s.is_empty()).collect();
             let tmp = format!("{}_{}", t1, t2);
