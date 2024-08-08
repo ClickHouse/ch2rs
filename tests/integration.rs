@@ -10,11 +10,11 @@ const URL: &str = "http://localhost:8123";
 
 const CREATE_TABLE_DDL: &str = "
     CREATE TABLE ch2rs_test (
-        u8          UInt8,
-        u16         UInt16,
-        u32         UInt32,
-        u64         UInt64,
-        u128        UInt128,
+        u8          UInt8 COMMENT 'this is a byte',
+        u16         UInt16 COMMENT 'these are two bytes',
+        u32         UInt32 COMMENT 'and these are four',
+        u64         UInt64 COMMENT 'eight...',
+        u128        UInt128 COMMENT 'come on!',
         i8          Int8,
         i16         Int16,
         i32         Int32,

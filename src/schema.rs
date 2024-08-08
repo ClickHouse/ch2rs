@@ -2,8 +2,6 @@ use std::fmt;
 
 #[derive(Debug)]
 pub struct Table {
-    pub database: String,
-    pub name: String,
     pub columns: Vec<Column>,
 }
 

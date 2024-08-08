@@ -27,10 +27,15 @@ ch2rs ch2rs_test -S --owned \
 #[derive(Clone)]
 #[derive(PartialEq)]
 pub struct Row {
+    /// this is a byte
     pub u8: u8,
+    /// these are two bytes
     pub u16: u16,
+    /// and these are four
     pub u32: u32,
+    /// eight...
     pub u64: u64,
+    /// come on!
     pub u128: u128,
     pub i8: i8,
     pub i16: i16,
