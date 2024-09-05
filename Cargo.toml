@@ -13,9 +13,14 @@ edition = "2021"
 name = "ch2rs"
 path = "bin/ch2rs.rs"
 
+[features]
+default = ["rustls-tls"]
+rustls-tls = ["clickhouse/rustls-tls"]
+native-tls = ["clickhouse/native-tls"]
+
 [dependencies]
 anyhow = "1.0.40"
-clickhouse = "0.12.1"
+clickhouse =  "0.12.2"
 heck = "0.5.0"
 serde = { version = "1.0.126", features = ["derive"] }
 structopt = "0.3.21"
@@ -27,4 +32,4 @@ serde_repr = "0.1.7"
 serde_bytes = "0.11.5"
 trybuild = "1.0.42"
 uuid = "1.2.1"
-clickhouse = { version = "0.12.1", features = ["uuid"] }
+clickhouse = { version = "0.12.2", features = ["uuid"] }

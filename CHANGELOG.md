@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- `rustls-tls` feature is enabled by default so that the library can work with HTTPS. Optionally, it is also possible to use `native-tls` instead.
 
 ## [0.1.7] - 2024-08-08
 ### Added
