@@ -14,6 +14,7 @@ name = "ch2rs"
 path = "bin/ch2rs.rs"
 
 [features]
+default = ["rustls-tls"]
 rustls-tls = ["clickhouse/rustls-tls"]
 native-tls = ["clickhouse/native-tls"]
 

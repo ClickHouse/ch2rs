@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-- `rustls-tls`, `native-tls` features so that the library can work with HTTPS
+- `rustls-tls` feature is enabled by default so that the library can work with HTTPS. Optionally, it is also possible to use `native-tls` instead.
 
 ## [0.1.7] - 2024-08-08
 ### Added
