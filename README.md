@@ -8,6 +8,12 @@ An auxiliary utility for generating Rust structures from ClickHouse DB schemas f
 cargo install ch2rs
 ```
 
+When working with an HTTPS URLs, install the crate with either `rustls-tls` or `native-tls` feature:
+
+```sh
+cargo install ch2rs --features rustls-tls
+```
+
 ### Help
 
 ```sh
