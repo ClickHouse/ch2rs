@@ -13,9 +13,13 @@ edition = "2021"
 name = "ch2rs"
 path = "bin/ch2rs.rs"
 
+[features]
+rustls-tls = ["clickhouse/rustls-tls"]
+native-tls = ["clickhouse/native-tls"]
+
 [dependencies]
 anyhow = "1.0.40"
-clickhouse = { version = "0.12.2", features = ["rustls-tls"] }
+clickhouse =  "0.12.2"
 heck = "0.5.0"
 serde = { version = "1.0.126", features = ["derive"] }
 structopt = "0.3.21"
