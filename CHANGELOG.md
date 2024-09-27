@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
+
+## [0.1.8] - 2024-09-27
 ### Added
 - `rustls-tls` feature is enabled by default so that the library can work with HTTPS. Optionally, it is also possible to use `native-tls` instead.
 
@@ -51,7 +53,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2021-05-30
 
 <!-- next-url -->
-[Unreleased]: https://github.com/ClickHouse/ch2rs/compare/v0.1.7...HEAD
+[Unreleased]: https://github.com/ClickHouse/ch2rs/compare/v0.1.8...HEAD
+[0.1.8]: https://github.com/ClickHouse/ch2rs/compare/v0.1.7...v0.1.8
 [0.1.7]: https://github.com/ClickHouse/ch2rs/compare/v0.1.6...v0.1.7
 [0.1.6]: https://github.com/ClickHouse/ch2rs/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/ClickHouse/ch2rs/compare/v0.1.4...v0.1.5
