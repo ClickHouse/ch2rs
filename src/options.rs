@@ -140,7 +140,7 @@ impl Options {
             let _ = writeln!(&mut s, "    -I '{}' \\", i);
         }
 
-        s.trim_end_matches(|c| c == '\\' || c == ' ' || c == '\n')
+        s.trim_end_matches(|c| ['\\', ' ', '\n'].contains(&c))
             .into()
     }
 }
