@@ -1,8 +1,9 @@
 ---
 source: tests/integration.rs
 expression: code
+snapshot_kind: text
 ---
-// GENERATED CODE (ch2rs v0.1.7)
+// GENERATED CODE (ch2rs v0.1.8)
 #![cfg_attr(rustfmt, rustfmt::skip)]
 #![allow(warnings)]
 #![allow(clippy::all)]
