@@ -49,6 +49,14 @@ ARGS:
     <table>    The table's name
 ```
 
+### Release
+
+```
+$ git tag $tag; 
+$ git push origin $tag  ## this will publish if conditions match
+
+```
+
 ## Examples
 
 See [snapshots](tests/snapshots).

@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 env:
   CARGO_TERM_COLOR: always
@@ -15,35 +15,48 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - run: cargo build --all-targets --all-features
+      - uses: actions/checkout@v2
+      - run: cargo build --all-targets --all-features
 
   rustfmt:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - run: rustup component add rustfmt
-    - run: cargo fmt --version
-    - run: cargo fmt -- --check
+      - uses: actions/checkout@v2
+      - run: rustup component add rustfmt
+      - run: cargo fmt --version
+      - run: cargo fmt -- --check
 
   clippy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - run: rustup component add clippy
-    - run: cargo clippy --version
-    - run: cargo clippy
-    - run: cargo clippy --all-targets --all-features
+      - uses: actions/checkout@v2
+      - run: rustup component add clippy
+      - run: cargo clippy --version
+      - run: cargo clippy
+      - run: cargo clippy --all-targets --all-features
 
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - run: cargo test
-    - run: cargo test --all-features
+      - uses: actions/checkout@v2
+      - run: cargo test
+      - run: cargo test --all-features
 
     services:
       clickhouse:
         image: clickhouse/clickhouse-server
         ports:
           - 8123:8123
+
+  artifact:
+    runs-on: ubuntu-latest
+    needs: [build, rustfmt, clippy, test]
+    steps:
+      - name: Upload CI Success
+        run: echo "CI passed" > ci_success.txt
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ci-success
+          path: ci_success.txt
+          retention-days: 1

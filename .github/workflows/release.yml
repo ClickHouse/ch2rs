@@ -1,0 +1,44 @@
+name: Release to crates.io
+
+on:
+  push:
+    tags:
+      - "v*.*.*" # Matches tags like v1.0.0, v2.1.3, etc.
+
+jobs:
+  crates_io_publish:
+    name: Publish (crates.io)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+
+      # Check the CI success artifact to ensure CI has passed
+      - name: CI success artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ci-success
+
+      - name: Cache Cargo Release
+        id: cargo_release_cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/cargo-release
+          key: ${{ runner.os }}-cargo-release
+
+      - run: cargo install cargo-release
+        if: steps.cargo_release_cache.outputs.cache-hit != 'true'
+
+      - name: cargo login
+        run: cargo login ${{ secrets.CRATES_IO_API_TOKEN }}
+
+      - name: "cargo release publish"
+        run: |-
+          cargo release \
+            publish \
+            --workspace \
+            --all-features \
+            --allow-branch HEAD \
+            --no-confirm \
+            --execute
