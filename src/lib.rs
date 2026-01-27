@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-pub use options::Options;
+pub use options::{Options, Override, Temporal, Type};
 
 mod codegen;
 mod miner;
