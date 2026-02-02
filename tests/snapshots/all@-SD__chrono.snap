@@ -1,0 +1,142 @@
+---
+source: tests/integration.rs
+expression: code
+---
+// GENERATED CODE (ch2rs v0.1.8)
+#![cfg_attr(rustfmt, rustfmt::skip)]
+#![allow(warnings)]
+#![allow(clippy::all)]
+
+// Generated with the following options:
+/*
+ch2rs ch2rs_test -S -D \
+        --derive Clone \
+        --derive PartialEq \
+        --temporal chrono \
+        -T 'FixedString(5)=[u8; 5]' \
+        -T 'Decimal(18, 9)=u64' \
+        -O 'blob=Vec<u8>' \
+        -B 'blob' \
+        -I 'ignored'
+*/
+
+#[derive(Debug, clickhouse::Row)]
+#[derive(serde::Serialize)]
+#[derive(serde::Deserialize)]
+#[derive(Clone)]
+#[derive(PartialEq)]
+pub struct Row<'a> {
+    /// this is a byte
+    pub u8: u8,
+    /// these are two bytes
+    pub u16: u16,
+    /// and these are four
+    pub u32: u32,
+    /// eight...
+    pub u64: u64,
+    /// come on!
+    pub u128: u128,
+    pub i8: i8,
+    pub i16: i16,
+    pub i32: i32,
+    pub i64: i64,
+    pub i128: i128,
+    pub bool: bool,
+    pub str: &'a str,
+    pub low_str: &'a str,
+    #[serde(with = "serde_bytes")]
+    pub blob: Vec<u8>,
+    pub fs: [u8; 5],
+    pub f32: f32,
+    pub f64: f64,
+    #[serde(with = "::clickhouse::serde::chrono::date")]
+    pub d: ::chrono::NaiveDate,
+    #[serde(with = "::clickhouse::serde::chrono::date::option")]
+    pub d_opt: Option<::chrono::NaiveDate>,
+    #[serde(with = "::clickhouse::serde::chrono::date32")]
+    pub d32: ::chrono::NaiveDate,
+    #[serde(with = "::clickhouse::serde::chrono::date32::option")]
+    pub d32_opt: Option<::chrono::NaiveDate>,
+    #[serde(with = "::clickhouse::serde::chrono::datetime")]
+    pub dt: ::chrono::DateTime<::chrono::Utc>,
+    #[serde(with = "::clickhouse::serde::chrono::datetime::option")]
+    pub dt_opt: Option<::chrono::DateTime<::chrono::Utc>>,
+    #[serde(with = "::clickhouse::serde::chrono::datetime64::secs")]
+    pub dt64_0: ::chrono::DateTime<::chrono::Utc>,
+    #[serde(with = "::clickhouse::serde::chrono::datetime64::secs::option")]
+    pub dt64_0_opt: Option<::chrono::DateTime<::chrono::Utc>>,
+    #[serde(with = "::clickhouse::serde::chrono::datetime64::millis")]
+    pub dt64_3: ::chrono::DateTime<::chrono::Utc>,
+    #[serde(with = "::clickhouse::serde::chrono::datetime64::millis::option")]
+    pub dt64_3_opt: Option<::chrono::DateTime<::chrono::Utc>>,
+    #[serde(with = "::clickhouse::serde::chrono::datetime64::micros")]
+    pub dt64_6: ::chrono::DateTime<::chrono::Utc>,
+    #[serde(with = "::clickhouse::serde::chrono::datetime64::micros::option")]
+    pub dt64_6_opt: Option<::chrono::DateTime<::chrono::Utc>>,
+    #[serde(with = "::clickhouse::serde::chrono::datetime64::nanos")]
+    pub dt64_9: ::chrono::DateTime<::chrono::Utc>,
+    #[serde(with = "::clickhouse::serde::chrono::datetime64::nanos::option")]
+    pub dt64_opt: Option<::chrono::DateTime<::chrono::Utc>>,
+    #[serde(with = "::clickhouse::serde::chrono::time")]
+    pub t: ::chrono::Duration,
+    #[serde(with = "::clickhouse::serde::chrono::time::option")]
+    pub t_opt: Option<::chrono::Duration>,
+    #[serde(with = "::clickhouse::serde::chrono::time64::secs")]
+    pub t64_0: ::chrono::Duration,
+    #[serde(with = "::clickhouse::serde::chrono::time64::secs::option")]
+    pub t64_0_opt: Option<::chrono::Duration>,
+    #[serde(with = "::clickhouse::serde::chrono::time64::millis")]
+    pub t64_3: ::chrono::Duration,
+    #[serde(with = "::clickhouse::serde::chrono::time64::millis::option")]
+    pub t64_3_opt: Option<::chrono::Duration>,
+    #[serde(with = "::clickhouse::serde::chrono::time64::micros")]
+    pub t64_6: ::chrono::Duration,
+    #[serde(with = "::clickhouse::serde::chrono::time64::micros::option")]
+    pub t64_6_opt: Option<::chrono::Duration>,
+    #[serde(with = "::clickhouse::serde::chrono::time64::nanos")]
+    pub t64_9: ::chrono::Duration,
+    #[serde(with = "::clickhouse::serde::chrono::time64::nanos::option")]
+    pub t64_9_opt: Option<::chrono::Duration>,
+    #[serde(with = "::clickhouse::serde::ipv4")]
+    pub ipv4: ::std::net::Ipv4Addr,
+    #[serde(with = "::clickhouse::serde::ipv4::option")]
+    pub ipv4_opt: Option<::std::net::Ipv4Addr>,
+    pub ipv6: ::std::net::Ipv6Addr,
+    #[serde(with = "::clickhouse::serde::uuid")]
+    pub uuid: ::uuid::Uuid,
+    #[serde(with = "::clickhouse::serde::uuid::option")]
+    pub uuid_opt: Option<::uuid::Uuid>,
+    pub dec64: u64,
+    pub enum8: Enum8,
+    pub enum16: Enum16,
+    pub array: Vec<&'a str>,
+    pub tuple: (&'a str, &'a str, ),
+    pub str_opt: Option<&'a str>,
+    pub map_str: Vec<(&'a str, &'a str, )>,
+    pub map_f32: Vec<(&'a str, f32, )>,
+    pub default: u16,
+    pub material: u16,
+    pub alias: u16,
+}
+
+#[derive(Debug)]
+#[derive(serde_repr::Serialize_repr)]
+#[derive(serde_repr::Deserialize_repr)]
+#[derive(Clone)]
+#[derive(PartialEq)]
+#[repr(i8)]
+pub enum Enum8 {
+    Empty = -128,
+    FooBar = 0,
+}
+
+#[derive(Debug)]
+#[derive(serde_repr::Serialize_repr)]
+#[derive(serde_repr::Deserialize_repr)]
+#[derive(Clone)]
+#[derive(PartialEq)]
+#[repr(i16)]
+pub enum Enum16 {
+    Empty = -128,
+    FooBar = 1024,
+}

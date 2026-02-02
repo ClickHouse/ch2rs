@@ -4,7 +4,7 @@ use anyhow::{bail, Context, Result};
 use heck::{ToSnakeCase, ToUpperCamelCase};
 
 use crate::{
-    options::Options,
+    options::{Options, Temporal},
     schema::{Column, SqlType, Table},
 };
 
@@ -56,7 +56,7 @@ fn generate_row(dst: &mut impl Write, table: &Table, options: &Options) -> Resul
 }
 
 fn generate_field(dst: &mut impl Write, column: &Column, options: &Options) -> Result<()> {
-    if let Some(attr) = make_attribute(column, options) {
+    if let Some(attr) = make_attribute(column, options)? {
         writeln!(dst, "{}", attr)?;
     }
 
@@ -71,29 +71,75 @@ fn generate_field(dst: &mut impl Write, column: &Column, options: &Options) -> R
     Ok(())
 }
 
-fn make_attribute(column: &Column, options: &Options) -> Option<String> {
+fn make_attribute(column: &Column, options: &Options) -> Result<Option<String>> {
     if options.bytes.iter().any(|b| b == &column.name) {
         // Works also for `Option<_>`.
-        return Some(r#"    #[serde(with = "serde_bytes")]"#.into());
+        return Ok(Some(r#"    #[serde(with = "serde_bytes")]"#.into()));
     }
 
     // Add nothing if the column is overrided by name or type.
     if find_override(&column.name, &column.type_, options).is_some() {
-        return None;
+        return Ok(None);
     }
 
-    let attr = match column.type_ {
-        SqlType::UUID => r#"    #[serde(with = "::clickhouse::serde::uuid")]"#,
-        SqlType::IPv4 => r#"    #[serde(with = "::clickhouse::serde::ipv4")]"#,
-        SqlType::Nullable(ref inner) => match inner.as_ref() {
-            SqlType::UUID => r#"    #[serde(with = "::clickhouse::serde::uuid::option")]"#,
-            SqlType::IPv4 => r#"    #[serde(with = "::clickhouse::serde::ipv4::option")]"#,
-            _ => return None,
-        },
-        _ => return None,
+    let (inner, is_option) = match &column.type_ {
+        SqlType::Nullable(inner) => (inner.as_ref(), true),
+        _ => (&column.type_, false),
     };
 
-    Some(attr.into())
+    let base = match inner {
+        SqlType::UUID => Ok(Some("::clickhouse::serde::uuid".into())),
+        SqlType::IPv4 => Ok(Some("::clickhouse::serde::ipv4".into())),
+        SqlType::Date => temporal_path(options.temporal, "date", None),
+        SqlType::Date32 => temporal_path(options.temporal, "date32", None),
+        SqlType::DateTime(_) => temporal_path(options.temporal, "datetime", None),
+        SqlType::DateTime64(prec, _) => temporal_path(options.temporal, "datetime64", Some(prec)),
+        SqlType::Time => temporal_path(options.temporal, "time", None),
+        SqlType::Time64(prec) => temporal_path(options.temporal, "time64", Some(prec)),
+        _ => Ok(None),
+    }?;
+
+    let base = match base {
+        Some(base) => base,
+        None => return Ok(None),
+    };
+
+    Ok(Some(format!(
+        "    #[serde(with = \"{}{}\")]",
+        base,
+        if is_option { "::option" } else { "" }
+    )))
+}
+
+fn temporal_path(temporal_mode: Temporal, ty: &str, prec: Option<&u32>) -> Result<Option<String>> {
+    let temporal_base = match temporal_mode {
+        Temporal::Time => Some("::clickhouse::serde::time::"),
+        Temporal::Chrono => Some("::clickhouse::serde::chrono::"),
+        Temporal::Raw => None,
+    };
+
+    let temporal_base = match temporal_base {
+        Some(base) => base,
+        None => return Ok(None),
+    };
+
+    let prec = match prec {
+        None => "",
+        Some(&0) => "::secs",
+        Some(&3) => "::millis",
+        Some(&6) => "::micros",
+        Some(&9) => "::nanos",
+        Some(p) => {
+            bail!(
+                "Unsupported precision {} for {} in {:?} mode; supported: 0, 3, 6, 9",
+                p,
+                ty,
+                temporal_mode
+            )
+        }
+    };
+
+    Ok(Some(format!("{}{}{}", temporal_base, ty, prec)))
 }
 
 fn make_type(column: &Column, options: &Options) -> Result<String> {
@@ -122,9 +168,38 @@ fn do_make_type(name: &str, sql_type: &SqlType, options: &Options) -> Result<Str
         // SqlType::FixedString(size) => todo!(),
         SqlType::Float32 => "f32".into(),
         SqlType::Float64 => "f64".into(),
-        // SqlType::Date => todo!(),
-        // SqlType::DateTime(_) => todo!(),
-        // SqlType::DateTime64(_, _) => todo!(),
+        SqlType::Date
+        | SqlType::Date32
+        | SqlType::DateTime(_)
+        | SqlType::DateTime64(_, _)
+        | SqlType::Time
+        | SqlType::Time64(_) => match options.temporal {
+            Temporal::Raw => match sql_type {
+                SqlType::Date => "u16".into(),
+                SqlType::Date32 => "i32".into(),
+                SqlType::DateTime(_) => "u32".into(),
+                SqlType::DateTime64(_, _) => "i64".into(),
+                SqlType::Time => "i32".into(),
+                SqlType::Time64(_) => "i64".into(),
+                _ => unreachable!(),
+            },
+            Temporal::Time => match sql_type {
+                SqlType::Date | SqlType::Date32 => "::time::Date".into(),
+                SqlType::DateTime(_) => "::time::OffsetDateTime".into(),
+                SqlType::DateTime64(..) => "::time::OffsetDateTime".into(),
+                SqlType::Time => "::time::Duration".into(),
+                SqlType::Time64(_) => "::time::Duration".into(),
+                _ => unreachable!(),
+            },
+            Temporal::Chrono => match sql_type {
+                SqlType::Date | SqlType::Date32 => "::chrono::NaiveDate".into(),
+                SqlType::DateTime(_) => "::chrono::DateTime<::chrono::Utc>".into(),
+                SqlType::DateTime64(..) => "::chrono::DateTime<::chrono::Utc>".into(),
+                SqlType::Time => "::chrono::Duration".into(),
+                SqlType::Time64(_) => "::chrono::Duration".into(),
+                _ => unreachable!(),
+            },
+        },
         SqlType::IPv4 => "::std::net::Ipv4Addr".into(),
         SqlType::IPv6 => "::std::net::Ipv6Addr".into(),
         SqlType::UUID => "::uuid::Uuid".into(),

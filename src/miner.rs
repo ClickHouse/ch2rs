@@ -112,7 +112,9 @@ pub fn parse_type(raw: &str) -> Result<SqlType> {
         "Float32" => SqlType::Float32,
         "Float64" => SqlType::Float64,
         "Date" => SqlType::Date,
+        "Date32" => SqlType::Date32,
         "DateTime" => SqlType::DateTime(None),
+        "Time" => SqlType::Time,
         "IPv4" => SqlType::IPv4,
         "IPv6" => SqlType::IPv6,
         "UUID" => SqlType::UUID,
@@ -133,6 +135,11 @@ pub fn parse_type(raw: &str) -> Result<SqlType> {
                     .map_or((inner, None), |(p, tz)| (p, Some(tz)));
                 let prec = prec.trim().parse().context("invalid precision")?;
                 SqlType::DateTime64(prec, tz.map(str::trim).map(Into::into))
+            }
+            // Time64(prec)
+            else if let Some(inner) = extract_inner(raw, "Time64") {
+                let prec = inner.trim().parse().context("invalid precision")?;
+                SqlType::Time64(prec)
             }
             // Enum8('K' = v, 'K2' = v2)
             else if let Some(inner) = extract_inner(raw, "Enum8") {

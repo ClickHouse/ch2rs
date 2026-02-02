@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
+### Added
+- Support ClickHouse `Time` / `Time64` plus `--temporal` mapping modes (`raw`, `time`, `chrono`) with serde integration ([#16]).
+
+[#16]: https://github.com/ClickHouse/ch2rs/pull/16
 
 ## [0.1.8] - 2024-09-27
 ### Added

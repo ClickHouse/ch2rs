@@ -43,11 +43,35 @@ OPTIONS:
         --derive <trait>...    Add `#[derive(<trait>)]` to the generated types
     -T <types>...              Override the type, e.g. 'Decimal(18, 9)=fixnum::FixedPoint<i64, typenum::U9>'
     -U <url>                   ClickHouse server's URL [default: localhost:8123]
+    --temporal <mode>          Temporal mapping: raw|time|chrono [default: raw]
     -u <user>
 
 ARGS:
     <table>    The table's name
 ```
+
+### Temporal modes
+
+- **raw** (default): uses primitive Rust types:
+  - Date → `u16`, Date32 → `i32`
+  - DateTime → `u32`, DateTime64(_) → `i64`
+  - Time → `i32`, Time64(_) → `i64`
+
+- **time**: uses the `time` crate types
+  - Date/Date32: `time::Date`
+  - DateTime/DateTime64: `time::OffsetDateTime`
+  - Time/Time64: `time::Duration`
+  - Requires in your project: `time` dependency and `clickhouse` feature `time`
+    - `clickhouse = { version = "…", features = ["time"] }`
+
+- **chrono**: uses the `chrono` crate types
+  - Date/Date32: `chrono::NaiveDate`
+  - DateTime/DateTime64: `chrono::DateTime<chrono::Utc>`
+  - Time/Time64: `chrono::Duration`
+  - Requires in your project: `chrono` dependency and `clickhouse` feature `chrono`
+    - `clickhouse = { version = "…", features = ["chrono"] }`
+
+Select mode via `--temporal {raw|time|chrono}`.
 
 ## Examples
 

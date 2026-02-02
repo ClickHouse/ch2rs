@@ -46,6 +46,10 @@ pub struct Options {
     /// Add `#[derive(<trait>)]` to the generated types.
     #[structopt(long = "derive", number_of_values = 1, name = "trait")]
     pub derives: Vec<String>,
+
+    /// Temporal mapping mode
+    #[structopt(long = "temporal", default_value = "raw", possible_values=&["raw", "time", "chrono"])]
+    pub temporal: Temporal,
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -74,6 +78,35 @@ fn parse_override(s: &str) -> Result<Override> {
         column: column.into(),
         type_: type_.into(),
     })
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Temporal {
+    Raw,
+    Time,
+    Chrono,
+}
+
+impl std::str::FromStr for Temporal {
+    type Err = String;
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        match s {
+            "raw" => Ok(Temporal::Raw),
+            "time" => Ok(Temporal::Time),
+            "chrono" => Ok(Temporal::Chrono),
+            _ => Err("invalid temporal".into()),
+        }
+    }
+}
+
+impl std::fmt::Display for Temporal {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Temporal::Raw => f.write_str("raw"),
+            Temporal::Time => f.write_str("time"),
+            Temporal::Chrono => f.write_str("chrono"),
+        }
+    }
 }
 
 impl Options {
@@ -106,6 +139,10 @@ impl Options {
                 s.push_str(derive);
                 s.push_str(" \\\n");
             }
+        }
+
+        if self.temporal != Temporal::Raw {
+            let _ = writeln!(&mut s, "    --temporal {} \\", self.temporal);
         }
 
         // -T

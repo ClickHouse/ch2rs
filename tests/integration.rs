@@ -28,8 +28,29 @@ const CREATE_TABLE_DDL: &str = "
         f32         Float32,
         f64         Float64,
         d           Date,
+        d_opt       Nullable(Date),
+        d32         Date32,
+        d32_opt     Nullable(Date32),
         dt          DateTime,
-        dt64        DateTime64(9),
+        dt_opt      Nullable(DateTime),
+        dt64_0      DateTime64(0),
+        dt64_0_opt  Nullable(DateTime64(0)),
+        dt64_3      DateTime64(3),
+        dt64_3_opt  Nullable(DateTime64(3)),
+        dt64_6      DateTime64(6),
+        dt64_6_opt  Nullable(DateTime64(6)),
+        dt64_9      DateTime64(9),
+        dt64_opt    Nullable(DateTime64(9)),
+        t           Time,
+        t_opt       Nullable(Time),
+        t64_0       Time64(0),
+        t64_0_opt   Nullable(Time64(0)),
+        t64_3       Time64(3),
+        t64_3_opt   Nullable(Time64(3)),
+        t64_6       Time64(6),
+        t64_6_opt   Nullable(Time64(6)),
+        t64_9       Time64(9),
+        t64_9_opt   Nullable(Time64(9)),
         ipv4        IPv4,
         ipv4_opt    Nullable(IPv4),
         ipv6        IPv6,
@@ -57,7 +78,8 @@ const CREATE_TABLE_DDL: &str = "
 async fn recreate_table() {
     let client = Client::default()
         .with_url(URL)
-        .with_option("allow_experimental_map_type", "1");
+        .with_option("allow_experimental_map_type", "1")
+        .with_option("enable_time_time64_type", "1");
 
     client
         .query("DROP TABLE IF EXISTS ch2rs_test")
@@ -81,44 +103,43 @@ async fn run_one(args: Vec<&str>) {
 }
 
 async fn generate_all() {
+    let temporal_modes = ["", "raw", "time", "chrono"];
     for t1 in &["-S", "-D", "-SD"] {
         for t2 in &["--owned", ""] {
-            let args = vec![
-                "ch2rs",
-                "ch2rs_test",
-                "-U",
-                URL,
-                t1,
-                t2,
-                "-T",
-                "FixedString(5)=[u8; 5]",
-                "-T",
-                "Date=u16",
-                "-T",
-                "DateTime=u32",
-                "-T",
-                "DateTime64(9)=u64",
-                "-T",
-                "Decimal(18, 9)=u64",
-                "-O",
-                "blob=Vec<u8>",
-                "-B",
-                "blob",
-                "-I",
-                "ignored",
-                "--derive",
-                "Clone",
-                "--derive",
-                "PartialEq",
-            ];
-            let args = args.into_iter().filter(|s| !s.is_empty()).collect();
-            let tmp = format!("{}_{}", t1, t2);
-            let suffix = tmp.trim_end_matches('_');
+            for mode in &temporal_modes {
+                let args = vec![
+                    "ch2rs",
+                    "ch2rs_test",
+                    "-U",
+                    URL,
+                    t1,
+                    t2,
+                    "--temporal",
+                    mode,
+                    "-T",
+                    "FixedString(5)=[u8; 5]",
+                    "-T",
+                    "Decimal(18, 9)=u64",
+                    "-O",
+                    "blob=Vec<u8>",
+                    "-B",
+                    "blob",
+                    "-I",
+                    "ignored",
+                    "--derive",
+                    "Clone",
+                    "--derive",
+                    "PartialEq",
+                ];
+                let args = args.into_iter().filter(|s| !s.is_empty()).collect();
+                let tmp = format!("{}_{}_{}", t1, t2, mode);
+                let suffix = tmp.trim_end_matches('_');
 
-            let mut settings = insta::Settings::clone_current();
-            settings.set_snapshot_suffix(suffix);
-            settings.set_prepend_module_to_snapshot(false);
-            settings.bind_async(run_one(args)).await;
+                let mut settings = insta::Settings::clone_current();
+                settings.set_snapshot_suffix(suffix);
+                settings.set_prepend_module_to_snapshot(false);
+                settings.bind_async(run_one(args)).await;
+            }
         }
     }
 }
