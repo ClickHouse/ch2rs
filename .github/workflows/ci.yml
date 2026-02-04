@@ -47,3 +47,5 @@ jobs:
         image: clickhouse/clickhouse-server
         ports:
           - 8123:8123
+        env:
+          CLICKHOUSE_SKIP_USER_SETUP: 1
