@@ -5,7 +5,8 @@ use structopt::StructOpt;
 
 use crate::schema::SqlType;
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, StructOpt, Default)]
+#[non_exhaustive]
 pub struct Options {
     /// ClickHouse server's URL.
     #[structopt(short = "U", default_value = "localhost:8123")]
@@ -52,7 +53,8 @@ pub struct Options {
     pub temporal: Temporal,
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Default)]
+#[non_exhaustive]
 pub struct Type {
     pub sql: SqlType,
     pub type_: String,
@@ -66,7 +68,8 @@ fn parse_type(s: &str) -> Result<Type> {
     })
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Default)]
+#[non_exhaustive]
 pub struct Override {
     pub column: String,
     pub type_: String,
@@ -80,8 +83,10 @@ fn parse_override(s: &str) -> Result<Override> {
     })
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[non_exhaustive]
 pub enum Temporal {
+    #[default]
     Raw,
     Time,
     Chrono,
