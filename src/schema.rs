@@ -12,7 +12,8 @@ pub struct Column {
     pub comment: String,
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Default)]
+#[non_exhaustive]
 #[allow(clippy::upper_case_acronyms)]
 pub enum SqlType {
     UInt8,
@@ -26,6 +27,7 @@ pub enum SqlType {
     Int64,
     Int128,
     Bool,
+    #[default]
     String,
     FixedString(u32),
     Float32,
