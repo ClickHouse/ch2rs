@@ -65,6 +65,8 @@ const CREATE_TABLE_DDL: &str = "
         map_str     Map(String, String),
         map_f32     Map(String, Float32),
 
+        str_sentinel String DEFAULT '',
+
         default     DEFAULT u16,
         material    MATERIALIZED u16,
         alias       ALIAS u16,
@@ -124,6 +126,8 @@ async fn generate_all() {
                     "blob=Vec<u8>",
                     "-B",
                     "blob",
+                    "-N",
+                    "str_sentinel",
                     "-I",
                     "ignored",
                     "--derive",

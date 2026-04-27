@@ -46,6 +46,10 @@ pub struct Options {
     /// Add `#[derive(<trait>)]` to the generated types.
     #[structopt(long = "derive", number_of_values = 1, name = "trait")]
     pub derives: Vec<String>,
+    /// Treat the column as Option, mapping the type's default value to None.
+    /// The sentinel is derived from the ClickHouse type (e.g. "" for String, 0 for UInt32).
+    #[structopt(short = "N", number_of_values = 1)]
+    pub sentinels: Vec<String>,
 
     /// Temporal mapping mode
     #[structopt(long = "temporal", default_value = "raw", possible_values=&["raw", "time", "chrono"])]
@@ -167,6 +171,14 @@ impl Options {
 
         for b in bytes {
             let _ = writeln!(&mut s, "    -B '{}' \\", b);
+        }
+
+        // -N
+        let mut sentinels = self.sentinels.iter().collect::<Vec<_>>();
+        sentinels.sort();
+
+        for n in sentinels {
+            let _ = writeln!(&mut s, "    -N '{}' \\", n);
         }
 
         // -I

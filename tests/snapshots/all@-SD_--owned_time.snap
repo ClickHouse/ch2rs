@@ -17,6 +17,7 @@ ch2rs ch2rs_test -S -D --owned \
         -T 'Decimal(18, 9)=u64' \
         -O 'blob=Vec<u8>' \
         -B 'blob' \
+        -N 'str_sentinel' \
         -I 'ignored'
 */
 
@@ -114,6 +115,8 @@ pub struct Row {
     pub str_opt: Option<String>,
     pub map_str: Vec<(String, String, )>,
     pub map_f32: Vec<(String, f32, )>,
+    #[serde(with = "sentinel_str_sentinel")]
+    pub str_sentinel: Option<String>,
     pub default: u16,
     pub material: u16,
     pub alias: u16,
@@ -139,4 +142,30 @@ pub enum Enum8 {
 pub enum Enum16 {
     Empty = -128,
     FooBar = 1024,
+}
+
+mod sentinel_str_sentinel {
+    use serde::{Deserializer, Serializer};
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let value = <String as serde::Deserialize>::deserialize(deserializer)?;
+        if value == "" {
+            Ok(None)
+        } else {
+            Ok(Some(value))
+        }
+    }
+
+    pub fn serialize<S>(value: &Option<String>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match value {
+            Some(v) => serde::Serialize::serialize(v, serializer),
+            None => serde::Serialize::serialize(&"", serializer),
+        }
+    }
 }

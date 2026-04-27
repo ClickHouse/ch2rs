@@ -71,10 +71,23 @@ fn generate_field(dst: &mut impl Write, column: &Column, options: &Options) -> R
     Ok(())
 }
 
+fn is_sentinel(column_name: &str, options: &Options) -> bool {
+    options.sentinels.iter().any(|s| s == column_name)
+}
+
+fn sentinel_mod_name(column_name: &str) -> String {
+    format!("sentinel_{}", column_name.to_snake_case())
+}
+
 fn make_attribute(column: &Column, options: &Options) -> Result<Option<String>> {
     if options.bytes.iter().any(|b| b == &column.name) {
         // Works also for `Option<_>`.
         return Ok(Some(r#"    #[serde(with = "serde_bytes")]"#.into()));
+    }
+
+    if is_sentinel(&column.name, options) {
+        let mod_name = sentinel_mod_name(&column.name);
+        return Ok(Some(format!(r#"    #[serde(with = "{}")]"#, mod_name)));
     }
 
     // Add nothing if the column is overrided by name or type.
@@ -143,6 +156,10 @@ fn temporal_path(temporal_mode: Temporal, ty: &str, prec: Option<&u32>) -> Resul
 }
 
 fn make_type(column: &Column, options: &Options) -> Result<String> {
+    if is_sentinel(&column.name, options) {
+        let (rust_type, _) = sentinel_info(&column.type_)?;
+        return Ok(format!("Option<{}>", rust_type));
+    }
     do_make_type(&column.name, &column.type_, options)
 }
 
@@ -314,6 +331,103 @@ fn prepare_name_ident(name: &str) -> String {
     }
 }
 
+fn sentinel_info(sql_type: &SqlType) -> Result<(&'static str, &'static str)> {
+    Ok(match sql_type {
+        SqlType::String => ("String", r#""""#),
+        SqlType::UInt8 => ("u8", "0u8"),
+        SqlType::UInt16 => ("u16", "0u16"),
+        SqlType::UInt32 => ("u32", "0u32"),
+        SqlType::UInt64 => ("u64", "0u64"),
+        SqlType::UInt128 => ("u128", "0u128"),
+        SqlType::Int8 => ("i8", "0i8"),
+        SqlType::Int16 => ("i16", "0i16"),
+        SqlType::Int32 => ("i32", "0i32"),
+        SqlType::Int64 => ("i64", "0i64"),
+        SqlType::Int128 => ("i128", "0i128"),
+        SqlType::Float32 => ("f32", "0f32"),
+        SqlType::Float64 => ("f64", "0f64"),
+        _ => bail!("-N is not supported for type {}", sql_type),
+    })
+}
+
+fn validate_sentinel(column: &Column, options: &Options) -> Result<()> {
+    if matches!(column.type_, SqlType::Nullable(_)) {
+        bail!(
+            "column `{}` is already Nullable; -N is not needed",
+            column.name
+        );
+    }
+    if find_override(&column.name, &column.type_, options).is_some() {
+        bail!(
+            "column `{}` has both -N and -O/-T; this combination is not supported",
+            column.name
+        );
+    }
+    Ok(())
+}
+
+fn generate_sentinel_modules(dst: &mut impl Write, table: &Table, options: &Options) -> Result<()> {
+    for column in &table.columns {
+        if !is_sentinel(&column.name, options) {
+            continue;
+        }
+
+        validate_sentinel(column, options)?;
+
+        let mod_name = sentinel_mod_name(&column.name);
+        let (rust_type, default_lit) = sentinel_info(&column.type_)
+            .with_context(|| format!("sentinel column `{}`", column.name))?;
+
+        writeln!(dst, "mod {} {{", mod_name)?;
+        writeln!(dst, "    use serde::{{Deserializer, Serializer}};")?;
+        writeln!(dst)?;
+        writeln!(
+            dst,
+            "    pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<{}>, D::Error>",
+            rust_type
+        )?;
+        writeln!(dst, "    where")?;
+        writeln!(dst, "        D: Deserializer<'de>,")?;
+        writeln!(dst, "    {{")?;
+        writeln!(
+            dst,
+            "        let value = <{} as serde::Deserialize>::deserialize(deserializer)?;",
+            rust_type
+        )?;
+        writeln!(dst, "        if value == {} {{", default_lit)?;
+        writeln!(dst, "            Ok(None)")?;
+        writeln!(dst, "        }} else {{")?;
+        writeln!(dst, "            Ok(Some(value))")?;
+        writeln!(dst, "        }}")?;
+        writeln!(dst, "    }}")?;
+        writeln!(dst)?;
+        writeln!(
+            dst,
+            "    pub fn serialize<S>(value: &Option<{}>, serializer: S) -> Result<S::Ok, S::Error>",
+            rust_type
+        )?;
+        writeln!(dst, "    where")?;
+        writeln!(dst, "        S: Serializer,")?;
+        writeln!(dst, "    {{")?;
+        writeln!(dst, "        match value {{")?;
+        writeln!(
+            dst,
+            "            Some(v) => serde::Serialize::serialize(v, serializer),",
+        )?;
+        writeln!(
+            dst,
+            "            None => serde::Serialize::serialize(&{}, serializer),",
+            default_lit
+        )?;
+        writeln!(dst, "        }}")?;
+        writeln!(dst, "    }}")?;
+        writeln!(dst, "}}")?;
+        writeln!(dst)?;
+    }
+
+    Ok(())
+}
+
 pub fn generate(table: &Table, options: &Options) -> Result<String> {
     let mut code = String::new();
     generate_prelude(&mut code, options).context("failed to generate a prelude")?;
@@ -321,5 +435,65 @@ pub fn generate(table: &Table, options: &Options) -> Result<String> {
     generate_row(&mut code, table, options).context("failed to generate a row")?;
     writeln!(code)?;
     generate_enums(&mut code, table, options).context("failed to generate enums")?;
+    generate_sentinel_modules(&mut code, table, options)
+        .context("failed to generate sentinel serde modules")?;
     Ok(code.trim().to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use structopt::StructOpt;
+    use test_case::test_case;
+
+    use super::*;
+
+    fn make_table(columns: Vec<(&str, SqlType)>) -> Table {
+        Table {
+            columns: columns
+                .into_iter()
+                .map(|(name, type_)| Column {
+                    name: name.into(),
+                    type_,
+                    comment: String::new(),
+                })
+                .collect(),
+        }
+    }
+
+    fn make_options(args: &[&str]) -> Options {
+        Options::from_iter(args)
+    }
+
+    #[test_case(SqlType::Nullable(Box::new(SqlType::UInt32)) ; "nullable")]
+    #[test_case(SqlType::Enum8(vec![])                       ; "enum8")]
+    #[test_case(SqlType::Array(Box::new(SqlType::String))    ; "array")]
+    #[test_case(SqlType::Date                                ; "date")]
+    #[test_case(SqlType::UUID                                ; "uuid")]
+    #[test_case(SqlType::Bool                                ; "bool")]
+    fn test_sentinel_rejected_for(sql_type: SqlType) {
+        let table = make_table(vec![("col", sql_type)]);
+        let options = make_options(&["ch2rs", "t", "-S", "-D", "-N", "col"]);
+        assert!(generate(&table, &options).is_err());
+    }
+
+    #[test_case(SqlType::String,  "Option<String>" ; "string")]
+    #[test_case(SqlType::UInt8,   "Option<u8>"     ; "u8")]
+    #[test_case(SqlType::UInt16,  "Option<u16>"    ; "u16")]
+    #[test_case(SqlType::UInt32,  "Option<u32>"    ; "u32")]
+    #[test_case(SqlType::UInt64,  "Option<u64>"    ; "u64")]
+    #[test_case(SqlType::UInt128, "Option<u128>"   ; "u128")]
+    #[test_case(SqlType::Int8,    "Option<i8>"     ; "i8")]
+    #[test_case(SqlType::Int16,   "Option<i16>"    ; "i16")]
+    #[test_case(SqlType::Int32,   "Option<i32>"    ; "i32")]
+    #[test_case(SqlType::Int64,   "Option<i64>"    ; "i64")]
+    #[test_case(SqlType::Int128,  "Option<i128>"   ; "i128")]
+    #[test_case(SqlType::Float32, "Option<f32>"    ; "f32")]
+    #[test_case(SqlType::Float64, "Option<f64>"    ; "f64")]
+    fn test_sentinel_generates(sql_type: SqlType, expected_type: &str) {
+        let table = make_table(vec![("col", sql_type)]);
+        let options = make_options(&["ch2rs", "t", "-S", "-D", "--owned", "-N", "col"]);
+        let code = generate(&table, &options).unwrap();
+        assert!(code.contains(&format!("pub col: {}", expected_type)));
+        assert!(code.contains("mod sentinel_col"));
+    }
 }
